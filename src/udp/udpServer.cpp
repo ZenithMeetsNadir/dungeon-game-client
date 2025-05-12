@@ -16,32 +16,47 @@ UdpServer::UdpServer(IPv4Addr addr) {
     this->ip4.sin_port = addr.port;
     this->dispatchFunc = DispatchFuncT();
 
-    WSAData wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData)) {
-        std::cerr << "WSAStartup failed" << std::endl;
-        return;
-    }
+    #ifdef _WIN32
+        WSAData wsaData;
+        if (WSAStartup(MAKEWORD(2, 2), &wsaData)) {
+            std::cerr << "WSAStartup failed" << std::endl;
+            return;
+        }
+    #endif
 }
 
 UdpServer::~UdpServer() {
-    WSACleanup();
+    #ifdef _WIN32
+        WSACleanup();
+    #endif
 }
 
 SOCKET UdpServer::getNonBlockingDGram() {
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock == INVALID_SOCKET) {
-        std::cerr << "socket creation failed with code " << WSAGetLastError() << std::endl;
+        std::cerr << "socket creation failed with code " << GETLASTERROR() << std::endl;
         closesocket(sock);
         return INVALID_SOCKET;
     }
 
-    u_long nonblocking = 1;
+    #ifdef _WIN32
+        u_long nonblocking = 1;
 
-    if (ioctlsocket(sock, FIONBIO, &nonblocking) == SOCKET_ERROR) {
-        std::cerr << "Setting socket to non-blocking failed with code " << WSAGetLastError() << std::endl;
-        closesocket(sock);
-        return INVALID_SOCKET;
-    }
+        if (ioctlsocket(sock, FIONBIO, &nonblocking) == SOCKET_ERROR) {
+            std::cerr << "Setting socket to non-blocking failed with code " << GETLASTERROR() << std::endl;
+            closesocket(sock);
+            return INVALID_SOCKET;
+        }
+    #endif
+    #ifdef __linux__
+        int flags = fcntl(sock, F_GETFL);
+
+        if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) == SOCKET_ERROR) {
+            std::cerr << "Setting socket to non-blocking failed with code " << GETLASTERROR() << std::endl;
+            closesocket(sock);
+            return INVALID_SOCKET;
+        }
+    #endif
 
     return sock;
 }
@@ -54,7 +69,7 @@ int UdpServer::open() {
     }
 
     if (bind(sock, (sockaddr *)&ip4, sizeof(ip4)) == SOCKET_ERROR) {
-        std::cerr << "socket bind failed with code " << WSAGetLastError() << std::endl;
+        std::cerr << "socket bind failed with code " << GETLASTERROR() << std::endl;
         closesocket(sock);
         return SOCKET_ERROR;
     }
@@ -77,7 +92,7 @@ void UdpServer::listenLoop() const {
 
     while (running.load(std::memory_order_acquire)) {
         sockaddr_in src;
-        int srcLen = sizeof(src);
+        socklen_t srcLen = sizeof(src);
         int recvRes = recvfrom(sock, buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&src, &srcLen);
 
         if (recvRes > 0) {
@@ -86,8 +101,8 @@ void UdpServer::listenLoop() const {
             addr.port = src.sin_port;
 
             dispatchFunc(this, addr, buffer, recvRes);
-        } else if (recvRes == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK) {
-            std::cerr << "recvfrom failed with code " << WSAGetLastError() << std::endl;
+        } else if (recvRes == SOCKET_ERROR && GETLASTERROR() != WOULDBLOCK) {
+            std::cerr << "recvfrom failed with code " << GETLASTERROR() << std::endl;
         }
     }
 }
@@ -109,7 +124,7 @@ int UdpServer::sendTo(IPv4Addr addr, const char *data, size_t size) const {
 
     int sendToRes = sendto(sock, data, size, 0, (sockaddr *)&dest, sizeof(dest));
     if (sendToRes == SOCKET_ERROR)
-        std::cerr << "sendto failed with code " << WSAGetLastError() << std::endl;
+        std::cerr << "sendto failed with code " << GETLASTERROR() << std::endl;
 
     return sendToRes;
 }
@@ -117,5 +132,5 @@ int UdpServer::sendTo(IPv4Addr addr, const char *data, size_t size) const {
 void UdpServer::enableBroadcast() const {
     int broadcast = 1;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR)
-        std::cerr << "enabling broadcast failed with code " << WSAGetLastError() << std::endl;
+        std::cerr << "enabling broadcast failed with code " << GETLASTERROR() << std::endl;
 }

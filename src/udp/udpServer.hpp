@@ -1,7 +1,31 @@
 #ifndef UDPSERVER_HPP
 #define UDPSERVER_HPP
 
-#include <WinSock2.h>
+#ifdef _WIN32
+    #include <WinSock2.h>
+
+    #define WOULDBLOCK WSAEWOULDBLOCK
+
+    #define GETLASTERROR() WSAGetLastError()
+#endif
+#ifdef __linux__
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <fcntl.h>
+
+    #define INVALID_SOCKET -1
+    #define SOCKET_ERROR -1
+    #define WOULDBLOCK EWOULDBLOCK
+
+    #define GETLASTERROR() errno
+
+    inline int closesocket(int sockfd) { return close(sockfd); }
+
+    typedef int SOCKET;
+#endif
+
 #include <iostream>
 #include <thread>
 #include <atomic>
