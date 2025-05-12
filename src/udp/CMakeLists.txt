@@ -1,2 +1,5 @@
 add_library(udp udpServer.cpp)
-target_link_libraries(udp ws2_32)
+
+if(WIN32)
+    target_link_libraries(udp ws2_32)
+endif()

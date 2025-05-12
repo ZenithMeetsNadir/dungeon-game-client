@@ -87,20 +87,20 @@ void UdpServer::close() {
     closesocket(this->sock);
 }
 
-void UdpServer::listenLoop() const {
+void listenLoop(const UdpServer *const server) {
     char buffer[UdpServer::BUFFER_SIZE];
 
-    while (running.load(std::memory_order_acquire)) {
+    while (server->running.load(std::memory_order_acquire)) {
         sockaddr_in src;
         socklen_t srcLen = sizeof(src);
-        int recvRes = recvfrom(sock, buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&src, &srcLen);
+        int recvRes = recvfrom(server->getSocket(), buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&src, &srcLen);
 
         if (recvRes > 0) {
             IPv4Addr addr;
             addr.addr = src.sin_addr;
             addr.port = src.sin_port;
 
-            dispatchFunc(this, addr, buffer, recvRes);
+            server->getDispatchFunc()(server, addr, buffer, recvRes);
         } else if (recvRes == SOCKET_ERROR && GETLASTERROR() != WOULDBLOCK) {
             std::cerr << "recvfrom failed with code " << GETLASTERROR() << std::endl;
         }
