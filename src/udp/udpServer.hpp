@@ -7,6 +7,8 @@
     #define WOULDBLOCK WSAEWOULDBLOCK
 
     #define GETLASTERROR() WSAGetLastError()
+
+    typedef int socklen_t;
 #endif
 #ifdef __linux__
     #include <sys/socket.h>
