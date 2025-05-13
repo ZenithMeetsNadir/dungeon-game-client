@@ -102,7 +102,10 @@ void listenLoop(const UdpServer *const server) {
 
             server->getDispatchFunc()(server, addr, buffer, recvRes);
         } else if (recvRes == SOCKET_ERROR && GETLASTERROR() != WOULDBLOCK) {
-            std::cerr << "recvfrom failed with code " << GETLASTERROR() << std::endl;
+            if (GETLASTERROR() != WOULDBLOCK)
+                std::cerr << "recvfrom failed with code " << GETLASTERROR() << std::endl;
+            
+            continue;
         }
     }
 }
