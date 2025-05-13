@@ -71,19 +71,19 @@ class UdpServer {
         int sendTo(IPv4Addr addr, const char *data, size_t size) const;
         void enableBroadcast() const;
         
-        inline SOCKET getSocket() const {
+        SOCKET getSocket() const {
             return sock;
         }
 
-        inline sockaddr_in getIp4() const {
+        sockaddr_in getIp4() const {
             return ip4;
         }
 
-        inline DispatchFuncT getDispatchFunc() const {
+        DispatchFuncT getDispatchFunc() const {
             return dispatchFunc;
         }
 
-        inline void setDispatchFunc(DispatchFuncT func) {
+        void setDispatchFunc(DispatchFuncT func) {
             dispatchFunc = func;
         }
 };
