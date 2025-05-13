@@ -95,17 +95,24 @@ void listenLoop(const UdpServer *const server) {
         socklen_t srcLen = sizeof(src);
         int recvRes = recvfrom(server->getSocket(), buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&src, &srcLen);
 
+        if (recvRes == SOCKET_ERROR) {
+            int err = GETLASTERROR();
+            if (err == MSGTOOBIG)
+                recvRes = UdpServer::BUFFER_SIZE;
+            else {
+                if (err != WOULDBLOCK)
+                    std::cerr << "recvfrom failed with code " << err << std::endl;
+            
+                continue;
+            }
+        }
+
         if (recvRes > 0) {
             IPv4Addr addr;
             addr.addr = src.sin_addr;
             addr.port = src.sin_port;
 
             server->getDispatchFunc()(server, addr, buffer, recvRes);
-        } else if (recvRes == SOCKET_ERROR && GETLASTERROR() != WOULDBLOCK) {
-            if (GETLASTERROR() != WOULDBLOCK)
-                std::cerr << "recvfrom failed with code " << GETLASTERROR() << std::endl;
-            
-            continue;
         }
     }
 }

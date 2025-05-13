@@ -5,6 +5,7 @@
     #include <WinSock2.h>
 
     #define WOULDBLOCK WSAEWOULDBLOCK
+    #define MSGTOOBIG WSAEMSGSIZE
 
     #define GETLASTERROR() WSAGetLastError()
 
@@ -17,9 +18,10 @@
     #include <unistd.h>
     #include <fcntl.h>
 
-    #define INVALID_SOCKET -1
-    #define SOCKET_ERROR -1
+    #define INVALID_SOCKET (-1)
+    #define SOCKET_ERROR (-1)
     #define WOULDBLOCK EWOULDBLOCK
+    #define MSGTOOBIG 0
 
     #define GETLASTERROR() errno
 
