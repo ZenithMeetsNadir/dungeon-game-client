@@ -11,7 +11,7 @@ LanLobbyClient::~LanLobbyClient() {
     delete this->dp;
 }
 
-void LanLobbyClient::dispatchSearchResponse(const LanLobbyClient *const self, IPv4Addr addr, const char *data, size_t size) {
+void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr, const char *data, size_t size) {
     std::cout << "received data from " << inet_ntoa(addr.addr) << ":" << ntohs(addr.port) << std::endl;
     
     std::string decoded = self->getDataPacker()->whichevercrypt(std::string(data, size));
@@ -26,21 +26,26 @@ void LanLobbyClient::dispatchSearchResponse(const LanLobbyClient *const self, IP
     if (!serverName.empty()) {
         size_t tick = std::stoll(self->getDataPacker()->valueOf(decoded, "t"));
 
+        GameServerInfo serverInfo;
+        serverInfo.addr = addr;
+        serverInfo.name = serverName;
+        serverInfo.tick = tick;
+        self->refreshServers(serverInfo);
+
         std::cout << serverName << ": " << inet_ntoa(addr.addr) << std::endl;
     }
 }
 
 struct EncapsulateDispatchFunc {
-    const LanLobbyClient *const self;
+    LanLobbyClient *self;
     
     void operator()(const UdpServer *const server, IPv4Addr addr, const char *data, size_t size) {
         LanLobbyClient::dispatchSearchResponse(self, addr, data, size);
     }
 };
 
-void LanLobbyClient::broadcastSearchLoop(const LanLobbyClient *const self) {
+void LanLobbyClient::broadcastSearchLoop(LanLobbyClient *self) {
     IPv4Addr brdcast("255.255.255.255", 6969);
-    size_t tickCounter = 0;
 
     std::cout << "broadcasting search trigger..." << std::endl;
     while (self->searchRunning.load(std::memory_order_acquire)) {
@@ -48,19 +53,18 @@ void LanLobbyClient::broadcastSearchLoop(const LanLobbyClient *const self) {
         
         std::string message = self->getDataPacker()->message();
         self->getDataPacker()->msgAppend(message, "s", "");
-        self->getDataPacker()->msgAppend(message, "t", std::to_string(tickCounter++));
+        self->getDataPacker()->msgAppend(message, "t", std::to_string(self->tickCounter++));
 
         std::string questionExistence = self->getDataPacker()->whichevercrypt(message);
 
         self->getUdpSearch()->sendTo(brdcast, questionExistence.c_str(), questionExistence.length());
+        self->refreshServers();
     }
 }
 
 bool LanLobbyClient::open() {
-    if (udpSearch->open() == SOCKET_ERROR) {
-        std::cerr << "failed to open UDP server" << std::endl;
+    if (udpSearch->open() == SOCKET_ERROR)
         return false;
-    }
 
     udpSearch->enableBroadcast();
     udpSearch->setDispatchFunc(EncapsulateDispatchFunc{ this });
@@ -83,4 +87,23 @@ bool LanLobbyClient::open() {
 
 void LanLobbyClient::close() {
     udpSearch->close();
+}
+
+void LanLobbyClient::refreshServers() {
+    serversMutex.lock();
+    for (size_t i = 0; i < listeningServers.size(); ++i) {
+        if (listeningServers[i].tick < tickCounter - latency) {
+            listeningServers.erase(listeningServers.begin() + i);
+            --i;
+        }
+    }
+    serversMutex.unlock();
+}
+
+void LanLobbyClient::refreshServers(GameServerInfo serverInfo) {
+    refreshServers();
+
+    serversMutex.lock();
+    listeningServers.push_back(serverInfo);
+    serversMutex.unlock();
 }
