@@ -11,8 +11,11 @@
 class LobbyWindow : public Window {
     protected:
         struct ServerVisual {
+            SDL_FRect box;
             SDL_Texture *texture;
             LanLobbyClient::GameServerInfo serverInfo;
+
+            bool hovered{ false };
 
             static const int width = 600;
             static const int padding = 20;
@@ -27,6 +30,8 @@ class LobbyWindow : public Window {
             }
         };
 
+        bool mousePressed{ false };
+
         LanLobbyClient *lanLobby;
 
         std::vector<ServerVisual *> serverVisuals;
@@ -37,10 +42,20 @@ class LobbyWindow : public Window {
         SDL_Texture *createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const;
         void createServerList() const;
 
+        SDL_FPoint getServerListOffset() const {
+            return SDL_FPoint{ 
+                static_cast<float>((context->width - ServerVisual::width) / 2), 
+                0 
+            };
+        }
+
+        void handleHover();
+
     public: 
         LobbyWindow(Context *context, TTF_Font *font);
         virtual ~LobbyWindow();
 
+        void handleEvent(const SDL_Event &event) override;
         void render() override;
 };
 

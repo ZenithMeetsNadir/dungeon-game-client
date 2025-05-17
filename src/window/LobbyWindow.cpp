@@ -58,10 +58,8 @@ void LobbyWindow::matchServerVisuals() {
                 found = true;
         }
 
-        if (!found) {
+        if (!found)
             serverVisuals.push_back(new ServerVisual(this, serverInfo));
-            std::cout << "Added server visual for " << serverInfo.name << std::endl;
-        }
     }
 }
 
@@ -98,7 +96,16 @@ void LobbyWindow::createServerList() const {
             static_cast<float>(serverVisual->texture->h + 2 * ServerVisual::padding)
         };
 
-        SDL_SetRenderDrawColor(context->renderer, 60, 60, 60, 255);
+        serverVisual->box = box;         
+
+        if (serverVisual->hovered) {
+            if (mousePressed)
+                SDL_SetRenderDrawColor(context->renderer, 100, 100, 150, 255);
+            else
+                SDL_SetRenderDrawColor(context->renderer, 80, 80, 120, 255);
+        } else
+            SDL_SetRenderDrawColor(context->renderer, 60, 60, 60, 255);
+
         SDL_RenderFillRect(context->renderer, &box);
 
         SDL_FRect textRect{
@@ -116,16 +123,40 @@ void LobbyWindow::createServerList() const {
     SDL_SetRenderTarget(context->renderer, nullptr);
 }
 
+void LobbyWindow::handleHover() {
+    float mx, my;
+    SDL_GetMouseState(&mx, &my);
+
+    SDL_FPoint serverListOffset = getServerListOffset();
+    SDL_FPoint relativeMPos{
+        mx - serverListOffset.x,
+        my - serverListOffset.y
+    };
+
+    for (auto serverVisual : serverVisuals) {
+        serverVisual->hovered = SDL_PointInRectFloat(&relativeMPos, &serverVisual->box);
+    }
+}
+
+void LobbyWindow::handleEvent(const SDL_Event &event) {
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT)
+        mousePressed = true;
+    else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP && event.button.button == SDL_BUTTON_LEFT)
+        mousePressed = false;
+}
+
 void LobbyWindow::render() {
     matchServerVisuals();
+    handleHover();
     createServerList();
 
     SDL_SetRenderDrawColor(context->renderer, 30, 30, 30, 255);
     SDL_RenderClear(context->renderer);
 
+    SDL_FPoint serverListOffset = getServerListOffset();
     SDL_FRect box{
-        static_cast<float>((context->width - serverList->w) / 2), 
-        0, 
+        serverListOffset.x,
+        serverListOffset.y,
         static_cast<float>(serverList->w), 
         static_cast<float>(serverList->h)
     };

@@ -14,6 +14,7 @@ class Window {
         Window(Context *context, TTF_Font *font);
         virtual ~Window();
 
+        virtual void handleEvent(const SDL_Event &event) = 0;
         virtual void render() = 0;
 };
 
