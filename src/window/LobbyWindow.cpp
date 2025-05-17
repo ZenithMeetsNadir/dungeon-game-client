@@ -1,0 +1,136 @@
+#include <window/LobbyWindow.hpp>
+
+const SDL_Color LobbyWindow::ServerVisual::textColor = { 255, 255, 255, 255 };
+
+LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
+    : Window(context, font) 
+{
+    lanLobby = new LanLobbyClient();
+
+    if (!lanLobby->open()) {
+        std::cerr << "Failed to open UDP server" << std::endl;
+        lanLobby->close();
+    }
+
+    serverVisuals = std::vector<ServerVisual *>();
+    serverList = SDL_CreateTexture(
+        context->renderer, 
+        SDL_PIXELFORMAT_RGBA8888, 
+        SDL_TEXTUREACCESS_TARGET, 
+        ServerVisual::width, context->height
+    );
+}
+
+LobbyWindow::~LobbyWindow() { 
+    SDL_DestroyTexture(serverList);
+
+    for (auto serverVisual : serverVisuals) {
+        delete serverVisual;
+    }
+
+    lanLobby->close();
+    delete lanLobby;
+}
+
+void LobbyWindow::matchServerVisuals() {
+    std::vector<LanLobbyClient::GameServerInfo> listeningServers;
+    lanLobby->copyListeningServersLock(listeningServers);
+
+    for (size_t i = 0; i < serverVisuals.size(); ++i) {
+        bool found = false;
+        for (const auto &serverInfo : listeningServers) {
+            if (serverVisuals[i]->serverInfo.sameOrigin(serverInfo)) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            auto removed = serverVisuals.erase(serverVisuals.begin() + i);
+            delete removed[0];
+            --i;
+        }
+    }
+
+    for (const auto &serverInfo : listeningServers) {
+        bool found = false;
+        for (auto serverVisual : serverVisuals) {
+            if (serverVisual->serverInfo.sameOrigin(serverInfo))
+                found = true;
+        }
+
+        if (!found) {
+            serverVisuals.push_back(new ServerVisual(this, serverInfo));
+            std::cout << "Added server visual for " << serverInfo.name << std::endl;
+        }
+    }
+}
+
+SDL_Texture *LobbyWindow::createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const {
+    std::string text = serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr);
+    SDL_Surface *surface = TTF_RenderText_Solid(
+        font, 
+        text.c_str(), 
+        text.length(), 
+        ServerVisual::textColor
+    );
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(context->renderer, surface);
+    if (!texture)
+        std::cout << "Failed to create texture from surface: " << SDL_GetError() << std::endl;
+
+    SDL_DestroySurface(surface);
+
+    return texture;
+}
+
+void LobbyWindow::createServerList() const {
+    SDL_SetRenderTarget(context->renderer, serverList);
+    SDL_SetRenderDrawColor(context->renderer, 0, 0, 0, 0);
+    SDL_RenderClear(context->renderer);
+
+    float y = ServerVisual::gap;
+
+    for (auto serverVisual : serverVisuals) {
+        SDL_FRect box{
+            0, 
+            y, 
+            static_cast<float>(serverList->w), 
+            static_cast<float>(serverVisual->texture->h + 2 * ServerVisual::padding)
+        };
+
+        SDL_SetRenderDrawColor(context->renderer, 60, 60, 60, 255);
+        SDL_RenderFillRect(context->renderer, &box);
+
+        SDL_FRect textRect{
+            ServerVisual::padding, 
+            y + ServerVisual::padding, 
+            static_cast<float>(serverVisual->texture->w), 
+            static_cast<float>(serverVisual->texture->h)
+        };
+
+        SDL_RenderTexture(context->renderer, serverVisual->texture, nullptr, &textRect);
+
+        y += box.h + ServerVisual::gap;
+    }
+
+    SDL_SetRenderTarget(context->renderer, nullptr);
+}
+
+void LobbyWindow::render() {
+    matchServerVisuals();
+    createServerList();
+
+    SDL_SetRenderDrawColor(context->renderer, 30, 30, 30, 255);
+    SDL_RenderClear(context->renderer);
+
+    SDL_FRect box{
+        static_cast<float>((context->width - serverList->w) / 2), 
+        0, 
+        static_cast<float>(serverList->w), 
+        static_cast<float>(serverList->h)
+    };
+
+    SDL_RenderTexture(context->renderer, serverList, nullptr, &box);
+
+    SDL_RenderPresent(context->renderer);
+}

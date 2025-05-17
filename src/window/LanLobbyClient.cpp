@@ -1,5 +1,8 @@
 #include <window/LanLobbyClient.hpp>
 
+const char *const LanLobbyClient::pw = "nejtajnejsiheslouwu";
+const char *const LanLobbyClient::prefix = "uwu";
+
 LanLobbyClient::LanLobbyClient() {
     this->udpSearch = new UdpServer(IPv4Addr("0.0.0.0", 0));
     this->dp = new DataPacker(pw, prefix);
@@ -11,11 +14,40 @@ LanLobbyClient::~LanLobbyClient() {
     delete this->dp;
 }
 
+void LanLobbyClient::refreshServers() {
+    serversMutex.lock();
+    for (size_t i = 0; i < listeningServers.size(); ++i) {
+        if (listeningServers[i].tick < tickCounter - latency) {
+            listeningServers.erase(listeningServers.begin() + i);
+            --i;
+        }
+    }
+    serversMutex.unlock();
+}
+
+void LanLobbyClient::refreshServers(GameServerInfo serverInfo) {
+    refreshServers();
+
+    bool updated = false;
+    serversMutex.lock();
+    for (size_t i = 0; i < listeningServers.size(); ++i) {
+        if (listeningServers[i].sameOrigin(serverInfo)) {
+            listeningServers[i] = serverInfo;
+            updated = true;
+        }
+    }
+
+    if (!updated)
+        listeningServers.push_back(serverInfo);
+        
+    serversMutex.unlock();
+}
+
 void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr, const char *data, size_t size) {
-    std::cout << "received data from " << inet_ntoa(addr.addr) << ":" << ntohs(addr.port) << std::endl;
+    //std::cout << "received data from " << inet_ntoa(addr.addr) << ":" << ntohs(addr.port) << std::endl;
     
     std::string decoded = self->getDataPacker()->whichevercrypt(std::string(data, size));
-    std::cout << "decoded data: " << decoded << std::endl;
+    //std::cout << "decoded data: " << decoded << std::endl;
 
     if (!self->getDataPacker()->verify(decoded)) {
         std::cerr << "invalid data received" << std::endl;
@@ -26,13 +58,14 @@ void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr,
     if (!serverName.empty()) {
         size_t tick = std::stoll(self->getDataPacker()->valueOf(decoded, "t"));
 
-        GameServerInfo serverInfo;
-        serverInfo.addr = addr;
-        serverInfo.name = serverName;
-        serverInfo.tick = tick;
+        GameServerInfo serverInfo{
+            addr,
+            serverName,
+            tick
+        };
         self->refreshServers(serverInfo);
 
-        std::cout << serverName << ": " << inet_ntoa(addr.addr) << std::endl;
+        //std::cout << serverName << ": " << inet_ntoa(addr.addr) << std::endl;
     }
 }
 
@@ -63,16 +96,20 @@ void LanLobbyClient::broadcastSearchLoop(LanLobbyClient *self) {
 }
 
 bool LanLobbyClient::open() {
-    if (udpSearch->open() == SOCKET_ERROR)
+    if (!udpSearch->open())
         return false;
 
-    udpSearch->enableBroadcast();
+    if (!udpSearch->enableBroadcast())
+        return false;
+
     udpSearch->setDispatchFunc(EncapsulateDispatchFunc{ this });
 
     udpSearch->listen();
 
     searchRunning.store(true, std::memory_order_release);
     broadcastThread = std::thread(broadcastSearchLoop, this);
+
+    return true;
 }
 
 void LanLobbyClient::close() {
@@ -80,23 +117,4 @@ void LanLobbyClient::close() {
     broadcastThread.join();
 
     udpSearch->close();
-}
-
-void LanLobbyClient::refreshServers() {
-    serversMutex.lock();
-    for (size_t i = 0; i < listeningServers.size(); ++i) {
-        if (listeningServers[i].tick < tickCounter - latency) {
-            listeningServers.erase(listeningServers.begin() + i);
-            --i;
-        }
-    }
-    serversMutex.unlock();
-}
-
-void LanLobbyClient::refreshServers(GameServerInfo serverInfo) {
-    refreshServers();
-
-    serversMutex.lock();
-    listeningServers.push_back(serverInfo);
-    serversMutex.unlock();
 }

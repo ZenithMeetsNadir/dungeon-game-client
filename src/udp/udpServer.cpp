@@ -61,20 +61,20 @@ SOCKET UdpServer::getNonBlockingDGram() {
     return sock;
 }
 
-int UdpServer::open() {
+bool UdpServer::open() {
     sock = getNonBlockingDGram();
     if (sock == INVALID_SOCKET) {
         std::cerr << "socket creation failed" << std::endl;
-        return SOCKET_ERROR;
+        return false;
     }
 
     if (bind(sock, (sockaddr *)&ip4, sizeof(ip4)) == SOCKET_ERROR) {
         std::cerr << "socket bind failed with code " << GETLASTERROR() << std::endl;
         closesocket(sock);
-        return SOCKET_ERROR;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 void UdpServer::close() {
@@ -84,7 +84,10 @@ void UdpServer::close() {
         std::cout << "server shut down" << std::endl;
     }
 
-    closesocket(this->sock);
+    if (sock != INVALID_SOCKET)
+        closesocket(sock);
+
+    sock = INVALID_SOCKET;
 }
 
 void listenLoop(const UdpServer *const server) {
@@ -139,8 +142,12 @@ int UdpServer::sendTo(IPv4Addr addr, const char *data, size_t size) const {
     return sendToRes;
 }
 
-void UdpServer::enableBroadcast() const {
+bool UdpServer::enableBroadcast() const {
     int broadcast = 1;
-    if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR)
+    if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR) {
         std::cerr << "enabling broadcast failed with code " << GETLASTERROR() << std::endl;
+        return false;
+    }
+
+    return true;
 }

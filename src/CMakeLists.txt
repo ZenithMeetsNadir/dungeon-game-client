@@ -5,5 +5,6 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
     udp
     context
+    lobbywindow
     lanlobbyclient
 )

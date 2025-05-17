@@ -1,5 +1,7 @@
 #include <window/Context.hpp>
 
+TTF_Font *Context::font_psp2 = nullptr;
+
 Context::Context(const char *title, int width, int height)
     : title(title), width(width), height(height) { }
 
@@ -7,18 +9,27 @@ Context::~Context() { }
 
 bool Context::init() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
-            std::cerr << "SDL_Init failed: " << SDL_GetError() << std::endl;
-            SDL_Quit();
-            return false;
-        }
+        std::cerr << "SDL_Init failed: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return false;
+    }
 
-        if (!TTF_Init()) {
-            std::cerr << "TTF_Init failed" << SDL_GetError() << std::endl;
-            SDL_Quit();
-            return false;
-        }
+    if (!TTF_Init()) {
+        std::cerr << "TTF_Init failed" << SDL_GetError() << std::endl;
+        SDL_Quit();
+        TTF_Quit();
+        return false;
+    }
 
-        return true;
+    font_psp2 = TTF_OpenFont("assets/font/PressStart2P-Regular.ttf", 18);
+    if (!font_psp2) {
+        std::cerr << "TTF_OpenFont failed to open PressStart2P-Regular.ttf: " << SDL_GetError() << std::endl;
+        TTF_Quit();
+        SDL_Quit();
+        return false;
+    }
+
+    return true;
 }
 
 void Context::quit() {

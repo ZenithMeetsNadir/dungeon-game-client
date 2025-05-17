@@ -34,6 +34,7 @@
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <string>
 
 struct IPv4Addr;
 class UdpServer;
@@ -46,11 +47,19 @@ struct IPv4Addr {
 
     IPv4Addr();
     IPv4Addr(const char *addr, u_short port);
+
+    bool operator==(const IPv4Addr &other) const {
+        return addr.s_addr == other.addr.s_addr && port == other.port;
+    }
+
+    operator std::string() const {
+        return std::string(inet_ntoa(this->addr)) + ":" + std::to_string(ntohs(this->port));
+    }
 };
 
 class UdpServer {
     protected: 
-        SOCKET sock;
+        SOCKET sock{ INVALID_SOCKET };
         sockaddr_in ip4;
         DispatchFuncT dispatchFunc;
         std::thread serveTh;
@@ -65,11 +74,11 @@ class UdpServer {
         UdpServer(IPv4Addr addr);
         ~UdpServer();
 
-        int open();
+        bool open();
         void close();
         void listen();
         int sendTo(IPv4Addr addr, const char *data, size_t size) const;
-        void enableBroadcast() const;
+        bool enableBroadcast() const;
         
         SOCKET getSocket() const {
             return sock;

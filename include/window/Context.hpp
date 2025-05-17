@@ -10,6 +10,8 @@ struct Context {
     SDL_Window *window{ nullptr };
     SDL_Renderer *renderer{ nullptr };
 
+    static TTF_Font *font_psp2;
+
     const char *title;
     int width;
     int height;
@@ -18,7 +20,6 @@ struct Context {
     ~Context();
 
     static bool init();
-    
     static void quit();
 
     bool createWindow();

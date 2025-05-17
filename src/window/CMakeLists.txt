@@ -28,7 +28,6 @@ endif()
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(context
-    OpenGL::GL
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf
 )
@@ -37,3 +36,15 @@ add_library(lanlobbyclient LanLobbyClient.cpp)
 target_include_directories(lanlobbyclient PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(lanlobbyclient PRIVATE udp)
+
+add_library(window Window.cpp)
+target_include_directories(window PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+target_link_libraries(window 
+    SDL3::SDL3
+    SDL3_ttf::SDL3_ttf
+)
+
+add_library(lobbywindow LobbyWindow.cpp)
+target_include_directories(lobbywindow PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(lobbywindow window)
