@@ -11,6 +11,11 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    std::cout << "press ENTER to stop the server..." << std::endl;
+    std::cin.get();
+
+    lobby.close();
+
     return 0;
 
     /*TTF_Font *font = TTF_OpenFont("C:\\Users\\marti\\programy\\c_cpp\\dungeon_game_client\\assets\\font\\constan.ttf", 64);

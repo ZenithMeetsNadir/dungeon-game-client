@@ -72,20 +72,13 @@ bool LanLobbyClient::open() {
     udpSearch->listen();
 
     searchRunning.store(true, std::memory_order_release);
-    std::thread broadcastThread(broadcastSearchLoop, this);
-
-    std::cout << "press ENTER to stop the server..." << std::endl;
-    std::cin.get();
-
-    searchRunning.store(false, std::memory_order_release);
-    broadcastThread.join();
-
-    udpSearch->close();
-
-    return true;
+    broadcastThread = std::thread(broadcastSearchLoop, this);
 }
 
 void LanLobbyClient::close() {
+    searchRunning.store(false, std::memory_order_release);
+    broadcastThread.join();
+
     udpSearch->close();
 }
 
