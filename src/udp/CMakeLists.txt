@@ -1,4 +1,4 @@
-add_library(udp UdpServer.cpp)
+add_library(udp UdpServer.cpp UdpClient.cpp)
 target_include_directories(udp PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 add_library(dataPacker dataPacker.cpp)

@@ -1,4 +1,4 @@
-#include <window/LanLobbyClient.hpp>
+#include <client/LanLobbyClient.hpp>
 
 const char *const LanLobbyClient::pw = "nejtajnejsiheslouwu";
 const char *const LanLobbyClient::prefix = "uwu";

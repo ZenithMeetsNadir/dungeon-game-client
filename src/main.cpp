@@ -1,4 +1,4 @@
-#include <window/LanLobbyClient.hpp>
+#include <client/LanLobbyClient.hpp>
 #include <window/Context.hpp>
 #include <window/LobbyWindow.hpp>
 #include <iostream>

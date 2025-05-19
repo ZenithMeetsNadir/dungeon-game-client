@@ -32,19 +32,11 @@ target_link_libraries(context
     SDL3_ttf::SDL3_ttf
 )
 
-add_library(lanlobbyclient LanLobbyClient.cpp)
-target_include_directories(lanlobbyclient PUBLIC ${PROJECT_SOURCE_DIR}/include)
-
-target_link_libraries(lanlobbyclient PRIVATE udp)
-
-add_library(window Window.cpp)
+add_library(window Window.cpp LobbyWindow.cpp)
 target_include_directories(window PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(window 
+target_link_libraries(window PRIVATE
+    client
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf
 )
-
-add_library(lobbywindow LobbyWindow.cpp)
-target_include_directories(lobbywindow PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(lobbywindow window)

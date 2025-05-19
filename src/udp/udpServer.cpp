@@ -90,40 +90,48 @@ void UdpServer::close() {
     sock = INVALID_SOCKET;
 }
 
-void listenLoop(const UdpServer *const server) {
+bool UdpServer::handleRecvMsg(sockaddr_in srcaddr, char *buffer, int recvRes) const {
+    if (recvRes == SOCKET_ERROR) {
+        int err = GETLASTERROR();
+        if (err == MSGTOOBIG)
+            recvRes = UdpServer::BUFFER_SIZE;
+        else {
+            if (err != WOULDBLOCK)
+                std::cerr << "recv failed with code " << err << std::endl;
+        
+            return false;
+        }
+    }
+
+    if (recvRes > 0) {
+        IPv4Addr addr;
+        addr.addr = srcaddr.sin_addr;
+        addr.port = srcaddr.sin_port;
+
+        dispatchFunc(this, addr, buffer, recvRes);
+    }
+
+    return true;
+}
+
+void UdpServer::listenLoop() const {
     char buffer[UdpServer::BUFFER_SIZE];
 
-    while (server->running.load(std::memory_order_acquire)) {
-        sockaddr_in src;
-        socklen_t srcLen = sizeof(src);
-        int recvRes = recvfrom(server->getSocket(), buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&src, &srcLen);
+    while (running.load(std::memory_order_acquire)) {
+        sockaddr_in srcaddr;
+        socklen_t srcLen = sizeof(srcaddr);
+        int recvRes = recvfrom(sock, buffer, UdpServer::BUFFER_SIZE, 0, (sockaddr *)&srcaddr, &srcLen);
 
-        if (recvRes == SOCKET_ERROR) {
-            int err = GETLASTERROR();
-            if (err == MSGTOOBIG)
-                recvRes = UdpServer::BUFFER_SIZE;
-            else {
-                if (err != WOULDBLOCK)
-                    std::cerr << "recvfrom failed with code " << err << std::endl;
-            
-                continue;
-            }
-        }
-
-        if (recvRes > 0) {
-            IPv4Addr addr;
-            addr.addr = src.sin_addr;
-            addr.port = src.sin_port;
-
-            server->getDispatchFunc()(server, addr, buffer, recvRes);
-        }
+        handleRecvMsg(srcaddr, buffer, recvRes);
     }
 }
 
 void UdpServer::listen() {
     if (!running.load(std::memory_order_acquire) && dispatchFunc) {
         running.store(true, std::memory_order_release);
-        serveTh = std::thread(listenLoop, this);
+
+        auto listenLoopBound = std::bind(&UdpServer::listenLoop, this);
+        serveTh = std::thread(listenLoopBound);
 
         std::cout << "sever running..." << std::endl;
     }

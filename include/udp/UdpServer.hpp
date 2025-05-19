@@ -65,6 +65,9 @@ class UdpServer {
         std::thread serveTh;
 
         SOCKET getNonBlockingDGram();
+
+        virtual void listenLoop() const;
+        bool handleRecvMsg(sockaddr_in srcaddr, char *buffer, int recvRes) const;
     
     public:
         static const size_t BUFFER_SIZE = 1024;
@@ -72,25 +75,13 @@ class UdpServer {
         std::atomic_bool running = false;
 
         UdpServer(IPv4Addr addr);
-        ~UdpServer();
+        virtual ~UdpServer();
 
-        bool open();
-        void close();
-        void listen();
+        virtual bool open();
+        virtual void close();
+        virtual void listen();
         int sendTo(IPv4Addr addr, const char *data, size_t size) const;
         bool enableBroadcast() const;
-        
-        SOCKET getSocket() const {
-            return sock;
-        }
-
-        sockaddr_in getIp4() const {
-            return ip4;
-        }
-
-        DispatchFuncT getDispatchFunc() const {
-            return dispatchFunc;
-        }
 
         void setDispatchFunc(DispatchFuncT func) {
             dispatchFunc = func;

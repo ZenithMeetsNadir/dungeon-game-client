@@ -1,8 +1,8 @@
 #ifndef LOBBYWINDOW_HPP
 #define LOBBYWINDOW_HPP
 
-#include <window/LanLobbyClient.hpp>
-#include <window/Window.hpp>
+#include <client/LanLobbyClient.hpp>
+#include "Window.hpp"
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <vector>
