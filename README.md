@@ -8,15 +8,21 @@ Hate to say that, but there is no way other than building the source... yeeey!
 
 ### Windows
 
-Required tools: `gcc`, `cmake`, `git`, `vcpkg`
+Required tools: `gcc`, `cmake`, `git`
+
+#### Step by step installation
+
+Not just yet...        
 
 ### Linux
 
 Required tools: `gcc`, `cmake`, `git`
 
+[Experimental bash script installation](install/linux_bash_install.sh) (still requires the tools)
+
 #### Step by step installation
 
-1. install SDLs
+1. Install SDLs
 
     The following will install SDLs into `$HOME/.local`
 
