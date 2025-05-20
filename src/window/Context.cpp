@@ -3,7 +3,7 @@
 TTF_Font *Context::font_psp2 = nullptr;
 
 Context::Context(const char *title, int width, int height)
-    : title(title), width(width), height(height) { }
+    : title(title), initWidth(width), initHeight(height) { }
 
 Context::~Context() { }
 
@@ -40,8 +40,8 @@ void Context::quit() {
 bool Context::createWindow() {
     window = SDL_CreateWindow(
         title,
-        width, height,
-        SDL_WINDOW_OPENGL
+        initWidth, initHeight,
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
     );
 
     if (!window) {

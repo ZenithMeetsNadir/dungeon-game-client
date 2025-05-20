@@ -10,11 +10,14 @@ class Window {
         Context *context;
         TTF_Font *font;
 
+        int width;
+        int height;
+
     public:
         Window(Context *context, TTF_Font *font);
         virtual ~Window();
 
-        virtual void handleEvent(const SDL_Event &event) = 0;
+        virtual void handleEvent(const SDL_Event &event);
         virtual void render() = 0;
 };
 

@@ -5,6 +5,9 @@ const SDL_Color LobbyWindow::ServerVisual::textColor = { 255, 255, 255, 255 };
 LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     : Window(context, font) 
 {
+    width = context->initWidth;
+    height = context->initHeight;
+
     lanLobby = new LanLobbyClient();
 
     if (!lanLobby->open()) {
@@ -13,12 +16,7 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     }
 
     serverVisuals = std::vector<ServerVisual *>();
-    serverList = SDL_CreateTexture(
-        context->renderer, 
-        SDL_PIXELFORMAT_RGBA8888, 
-        SDL_TEXTUREACCESS_TARGET, 
-        ServerVisual::width, context->height
-    );
+    updateServerListTexture();
 }
 
 LobbyWindow::~LobbyWindow() { 
@@ -63,6 +61,22 @@ void LobbyWindow::matchServerVisuals() {
     }
 }
 
+void LobbyWindow::invalidateServerVisuals() {
+    for (auto serverVisual : serverVisuals) {
+        if (serverVisual->texture) {
+            SDL_DestroyTexture(serverVisual->texture);
+            serverVisual->texture = nullptr;
+        }
+    }
+}
+
+void LobbyWindow::updateServerVisuals() {
+    for (auto serverVisual : serverVisuals) {
+        if (!serverVisual->texture)
+            serverVisual->texture = createServerVisual(serverVisual->serverInfo);
+    }
+}
+
 SDL_Texture *LobbyWindow::createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const {
     std::string text = serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr);
     SDL_Surface *surface = TTF_RenderText_Solid(
@@ -81,7 +95,16 @@ SDL_Texture *LobbyWindow::createServerVisual(const LanLobbyClient::GameServerInf
     return texture;
 }
 
-void LobbyWindow::createServerList() const {
+void LobbyWindow::updateServerListTexture() {
+    serverList = SDL_CreateTexture(
+        context->renderer, 
+        SDL_PIXELFORMAT_RGBA8888, 
+        SDL_TEXTUREACCESS_TARGET, 
+        ServerVisual::width, height
+    );
+}
+
+void LobbyWindow::prepareServerList() const {
     SDL_SetRenderTarget(context->renderer, serverList);
     SDL_SetRenderDrawColor(context->renderer, 0, 0, 0, 0);
     SDL_RenderClear(context->renderer);
@@ -139,16 +162,30 @@ void LobbyWindow::handleHover() {
 }
 
 void LobbyWindow::handleEvent(const SDL_Event &event) {
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT)
-        mousePressed = true;
-    else if (event.type == SDL_EVENT_MOUSE_BUTTON_UP && event.button.button == SDL_BUTTON_LEFT)
-        mousePressed = false;
+    Window::handleEvent(event);
+
+    switch (event.type) {
+        case SDL_EVENT_WINDOW_RESIZED:
+            updateServerListTexture();
+            invalidateServerVisuals();
+            updateServerVisuals();
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            if (event.button.button == SDL_BUTTON_LEFT)
+                mousePressed = true;
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            if (event.button.button == SDL_BUTTON_LEFT)
+                mousePressed = false;
+            break;
+    }
 }
 
 void LobbyWindow::render() {
     matchServerVisuals();
+    updateServerVisuals();
     handleHover();
-    createServerList();
+    prepareServerList();
 
     SDL_SetRenderDrawColor(context->renderer, 30, 30, 30, 255);
     SDL_RenderClear(context->renderer);

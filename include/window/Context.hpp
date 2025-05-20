@@ -13,8 +13,8 @@ struct Context {
     static TTF_Font *font_psp2;
 
     const char *title;
-    int width;
-    int height;
+    int initWidth;
+    int initHeight;
 
     Context(const char *title, int width, int height);
     ~Context();

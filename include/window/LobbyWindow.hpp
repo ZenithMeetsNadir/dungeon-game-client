@@ -12,7 +12,7 @@ class LobbyWindow : public Window {
     protected:
         struct ServerVisual {
             SDL_FRect box;
-            SDL_Texture *texture;
+            SDL_Texture *texture{ nullptr };
             LanLobbyClient::GameServerInfo serverInfo;
 
             bool hovered{ false };
@@ -22,11 +22,10 @@ class LobbyWindow : public Window {
             static const int gap = 20;
             static const SDL_Color textColor;
 
-            ServerVisual(const LobbyWindow *lobbyWindow, const LanLobbyClient::GameServerInfo serverInfo) : serverInfo(serverInfo) {
-                texture = lobbyWindow->createServerVisual(serverInfo);
-            }
+            ServerVisual(const LobbyWindow *lobbyWindow, const LanLobbyClient::GameServerInfo serverInfo) : serverInfo(serverInfo) { }
             ~ServerVisual() {
-                SDL_DestroyTexture(this->texture);
+                if (texture) 
+                    SDL_DestroyTexture(texture);
             }
         };
 
@@ -38,13 +37,17 @@ class LobbyWindow : public Window {
         SDL_Texture *serverList;
 
         void matchServerVisuals();
+        void invalidateServerVisuals();
+        void updateServerVisuals();
 
         SDL_Texture *createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const;
-        void createServerList() const;
+
+        void updateServerListTexture();
+        void prepareServerList() const;
 
         SDL_FPoint getServerListOffset() const {
             return SDL_FPoint{ 
-                static_cast<float>((context->width - ServerVisual::width) / 2), 
+                static_cast<float>((width - ServerVisual::width) / 2), 
                 0 
             };
         }

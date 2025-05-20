@@ -5,3 +5,12 @@ Window::Window(Context *context, TTF_Font *font)
 { }
 
 Window::~Window() { }
+
+void Window::handleEvent(const SDL_Event &event) {
+    switch (event.type) {
+        case SDL_EVENT_WINDOW_RESIZED:
+            width = event.window.data1;
+            height = event.window.data2;
+            break;
+    }
+}
