@@ -200,5 +200,12 @@ void LobbyWindow::render() {
 
     SDL_RenderTexture(context->renderer, serverList, nullptr, &box);
 
+    /*SDL_Texture* tex = IMG_LoadTexture(context->renderer, "C:\\Users\\marti\\programy\\angular\\pisq\\pisqapp\\src\\assets\\images\\debris.png");
+    if (!tex) 
+        std::cerr << "Failed to load texture: " << SDL_GetError() << "\n";
+
+    SDL_RenderTexture(context->renderer, tex, nullptr, &box);
+    SDL_DestroyTexture(tex);*/
+
     SDL_RenderPresent(context->renderer);
 }

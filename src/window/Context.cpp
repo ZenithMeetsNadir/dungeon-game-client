@@ -16,8 +16,8 @@ bool Context::init() {
 
     if (!TTF_Init()) {
         std::cerr << "TTF_Init failed" << SDL_GetError() << std::endl;
-        SDL_Quit();
         TTF_Quit();
+        SDL_Quit();
         return false;
     }
 
