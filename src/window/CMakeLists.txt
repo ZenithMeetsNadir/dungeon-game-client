@@ -1,4 +1,4 @@
-add_library(context Context.cpp)
+add_library(context STATIC Context.cpp)
 target_include_directories(context PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if(WIN32)
@@ -9,16 +9,16 @@ endif()
 
 find_package(SDL3_ttf REQUIRED CONFIG)
 
-target_link_libraries(context
+target_link_libraries(context PUBLIC
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
     SDL3::SDL3
 )
 
-add_library(window Window.cpp LobbyWindow.cpp)
+add_library(window STATIC Window.cpp LobbyWindow.cpp)
 target_include_directories(window PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-target_link_libraries(window PRIVATE
+target_link_libraries(window PUBLIC
     client
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
