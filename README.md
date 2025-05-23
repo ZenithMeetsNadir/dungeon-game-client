@@ -6,49 +6,37 @@ Info will be dumped later... now to the installation guide!
 
 Hate to say that, but there is no way other than building the source... yeeey!
 
-### Windows
+Required tools: `git`, `cmake`
 
-Required tools: `gcc`, `cmake`, `git`
+### Step by step installation
 
-#### Step by step installation
-
-Not just yet...        
-
-### Linux
-
-Required tools: `gcc`, `cmake`, `git`
-
-[Experimental bash script installation](install/linux_bash_install.sh) (still requires the tools)
-
-#### Step by step installation
-
-1. Install SDLs
-
-    The following will install SDLs into `$HOME/.local`
-
-    Make sure to install font rendering libraries for `SDL_ttf` first:
-
-        sudo apt install libharfbuzz-dev libfreetype-dev
-    
-    Clone SDLs:
-
-        git clone https://github.com/libsdl-org/SDL.git
-        git clone https://github.com/libsdl-org/SDL_ttf.git
-        
-    Then in both SDL repositories build and install using cmake:
-
-        cmake -Bbuild -DSDL_STATIC=OFF -DCMAKE_INSTALL_PREFIX=$HOME/.local
-        cmake --build build
-        cmake --install build
-
-2. Install the game!
-
-    Clone game repository:
+1. Clone game repository:
 
         git clone https://github.com/ZenithMeetsNadir/dungeon-game-client.git
 
-    The following will install the game directly to path `${your-desired-path}` you provide:
+    Check its directory and proceed with platform dependent installation.
 
-        cmake -Bbuild -DCMAKE_INSTALL_PREFIX=${your-desired-path}
+
+#### Windows
+
+Additional required tools: `mingw`
+
+2. Create build files:
+
+        cmake -B build -D CMAKE_INSTALL_PREFIX=. -G MinGW Makefiles"
+
+#### Linux
+
+2. Create build files:
+
+        cmake -B build -D CMAKE_INSTALL_PREFIX=.
+
+
+### Continue platform independent step by step installation
+
+3. Build and install:
+
         cmake --build build
         cmake --install build
+
+    This installs the binary executable in the top level of the repository. If you wish to provide a custom installation path, modify the `CMAKE_INSTALL_PREFIX` in the second step to your likings.
