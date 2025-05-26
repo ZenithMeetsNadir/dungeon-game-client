@@ -133,7 +133,7 @@ void UdpServer::listen() {
         auto listenLoopBound = std::bind(&UdpServer::listenLoop, this);
         serveTh = std::thread(listenLoopBound);
 
-        std::cout << "sever running..." << std::endl;
+        std::cout << "server running..." << std::endl;
     }
 }
 

@@ -17,9 +17,15 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
 
     serverVisuals = std::vector<ServerVisual *>();
     updateServerListTexture();
+    
+    playButtonComponent = new Button(context->renderer, "Play");
+    playButtonComponent->setBounds();
+    playButtonComponent->queryTexture();
 }
 
 LobbyWindow::~LobbyWindow() { 
+    delete playButtonComponent;
+
     SDL_DestroyTexture(serverList);
 
     for (auto serverVisual : serverVisuals) {
@@ -57,7 +63,7 @@ void LobbyWindow::matchServerVisuals() {
         }
 
         if (!found)
-            serverVisuals.push_back(new ServerVisual(this, serverInfo));
+            serverVisuals.push_back(new ServerVisual(serverInfo));
     }
 }
 
@@ -143,6 +149,16 @@ void LobbyWindow::prepareServerList() const {
         y += box.h + ServerVisual::gap;
     }
 
+    SDL_FRect playButtonBounds = playButtonComponent->getBounds();
+    playButtonComponent->setPos(
+        static_cast<float>((serverList->w - playButtonBounds.w) / 2),
+        height - playButtonBounds.h - ServerVisual::gap
+    );
+
+    playButtonComponent->setAbsPoint(getServerListOffset());
+
+    playButtonComponent->render();
+
     SDL_SetRenderTarget(context->renderer, nullptr);
 }
 
@@ -184,7 +200,10 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 void LobbyWindow::render() {
     matchServerVisuals();
     updateServerVisuals();
+    
     handleHover();
+    playButtonComponent->handleMouseEvents();
+
     prepareServerList();
 
     SDL_SetRenderDrawColor(context->renderer, 30, 30, 30, 255);

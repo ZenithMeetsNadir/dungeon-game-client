@@ -1,0 +1,78 @@
+#include <component/Button.hpp>
+
+const SDL_Color Button::textColor = { 255, 255, 255, 255 };
+const SDL_Color Button::idleColor = { 60, 60, 60, 255 };
+const SDL_Color Button::hoverColor = { 80, 80, 120, 255 };
+const SDL_Color Button::pressedColor = { 100, 100, 150, 255 };
+
+Button::Button(SDL_Renderer *renderer, const std::string &text)
+    : text(text), renderer(renderer)
+{
+    
+}
+
+Button::~Button() {
+    if (texture)
+        SDL_DestroyTexture(texture);
+}
+
+void Button::createTexture() {
+    if (!texture) {
+        SDL_Surface *surface = TTF_RenderText_Solid(
+            Context::font_psp2,
+            text.c_str(),
+            text.length(),
+            textColor
+        );
+        
+        if (!surface) {
+            std::cerr << "Failed to create button text surface: " << SDL_GetError() << std::endl;
+            return;
+        }
+
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (!texture)
+            std::cerr << "Failed to create texture from button text surface: " << SDL_GetError() << std::endl;
+        else {
+            if (bounds.w < 0)
+                bounds.w = surface->w + 2 * padding;
+
+            bounds.h = surface->h + 2 * padding;
+        }
+
+        SDL_DestroySurface(surface);
+    }
+}
+
+void Button::handleMouseEvents() {
+    float mx, my;
+    SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
+
+    mx -= absPoint.x;
+    my -= absPoint.y;
+    SDL_FPoint mousePos = { mx, my };
+
+    bool hovered = SDL_PointInRectFloat(&mousePos, &bounds);
+    backColor = hovered ? hoverColor : idleColor;
+
+    if (hovered && mouseState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) 
+        backColor = pressedColor;
+}
+
+void Button::render() {
+    if (!texture)
+        createTexture();
+
+    SDL_SetRenderDrawColor(renderer, backColor.r, backColor.g, backColor.b, backColor.a);
+    SDL_RenderFillRect(renderer, &bounds);
+
+    if (texture) {
+        SDL_FRect textRect = { 
+            bounds.x + padding, 
+            bounds.y + padding, 
+            static_cast<float>(texture->w), 
+            static_cast<float>(texture->h)
+        };
+        SDL_RenderTexture(renderer, texture, nullptr, &textRect);
+    }
+}

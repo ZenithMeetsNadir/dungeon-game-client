@@ -20,6 +20,7 @@ target_include_directories(window PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(window PUBLIC
     client
+    component
     SDL3_image::SDL3_image
     SDL3_ttf::SDL3_ttf
     SDL3::SDL3

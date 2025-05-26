@@ -8,6 +8,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <vector>
 #include <string>
+#include <component/Button.hpp>
 
 class LobbyWindow : public Window {
     protected:
@@ -23,11 +24,8 @@ class LobbyWindow : public Window {
             static const int gap = 20;
             static const SDL_Color textColor;
 
-            ServerVisual(const LobbyWindow *lobbyWindow, const LanLobbyClient::GameServerInfo serverInfo) : serverInfo(serverInfo) { }
-            ~ServerVisual() {
-                if (texture) 
-                    SDL_DestroyTexture(texture);
-            }
+            ServerVisual(const LanLobbyClient::GameServerInfo &serverInfo);
+            ~ServerVisual();
         };
 
         bool mousePressed{ false };
@@ -37,21 +35,23 @@ class LobbyWindow : public Window {
         std::vector<ServerVisual *> serverVisuals;
         SDL_Texture *serverList;
 
+        Button *playButtonComponent;
+
+        /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
+        /// @brief Destroy all textures in serverVisuals and set them to nullptr.
         void invalidateServerVisuals();
+        /// @brief Create textures for all serverVisuals that do not have a texture yet.
         void updateServerVisuals();
 
         SDL_Texture *createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const;
 
+        /// @brief Update dimensions of the server list texture.
         void updateServerListTexture();
+        /// @brief Prerender the server list texture.
         void prepareServerList() const;
 
-        SDL_FPoint getServerListOffset() const {
-            return SDL_FPoint{ 
-                static_cast<float>((width - ServerVisual::width) / 2), 
-                0 
-            };
-        }
+        SDL_FPoint getServerListOffset() const;
 
         void handleHover();
 
@@ -62,5 +62,21 @@ class LobbyWindow : public Window {
         void handleEvent(const SDL_Event &event) override;
         void render() override;
 };
+
+inline LobbyWindow::ServerVisual::ServerVisual(const LanLobbyClient::GameServerInfo &serverInfo)
+    : serverInfo(serverInfo) 
+{ }
+
+inline LobbyWindow::ServerVisual::~ServerVisual() {
+    if (texture) 
+        SDL_DestroyTexture(texture);
+}
+
+inline SDL_FPoint LobbyWindow::getServerListOffset() const {
+    return SDL_FPoint{ 
+        static_cast<float>((width - ServerVisual::width) / 2), 
+        0 
+    };
+} 
 
 #endif
