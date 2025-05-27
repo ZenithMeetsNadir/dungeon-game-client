@@ -3,7 +3,7 @@
 const SDL_Color Button::textColor = { 255, 255, 255, 255 };
 const SDL_Color Button::idleColor = { 60, 60, 60, 255 };
 const SDL_Color Button::hoverColor = { 80, 80, 120, 255 };
-const SDL_Color Button::pressedColor = { 100, 100, 150, 255 };
+const SDL_Color Button::pressedColor = { 120, 120, 180, 255 };
 
 Button::Button(SDL_Renderer *renderer, const std::string &text)
     : text(text), renderer(renderer)
@@ -52,12 +52,28 @@ void Button::handleMouseEvents() {
     my -= absPoint.y;
     SDL_FPoint mousePos = { mx, my };
 
-    bool hovered = SDL_PointInRectFloat(&mousePos, &bounds);
-    backColor = hovered ? hoverColor : idleColor;
+    bool oldHovered = hovered;
+    bool oldPressed = pressed;
+    hovered = SDL_PointInRectFloat(&mousePos, &bounds);
+    pressed =  hovered && mouseState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT);
 
-    if (hovered && mouseState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) 
-        backColor = pressedColor;
+    if (hovered != oldHovered)
+        hovered ? onHover() : onLeave();
+
+    if (pressed != oldPressed) 
+        pressed ? onClick() : onRelease();
+
+    determineBackColor();
 }
+
+void Button::determineBackColor() {
+    backColor = pressed ? pressedColor : (hovered ? hoverColor : idleColor);
+}
+
+void Button::onHover() { }
+void Button::onLeave() { }
+void Button::onClick() { }
+void Button::onRelease() { }
 
 void Button::render() {
     if (!texture)

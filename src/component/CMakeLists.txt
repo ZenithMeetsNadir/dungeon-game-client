@@ -1,4 +1,4 @@
-add_library(component STATIC Button.cpp)
+add_library(component STATIC Button.cpp SelectButton.cpp)
 target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if(WIN32)

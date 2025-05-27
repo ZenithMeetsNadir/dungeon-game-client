@@ -18,12 +18,19 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     serverVisuals = std::vector<ServerVisual *>();
     updateServerListTexture();
     
-    playButtonComponent = new Button(context->renderer, "Play");
+    playButtonComponent = new SelectButton(context->renderer, "Play");
+    playButtonComponent->setSelectGroup(&playSelectGroup);
     playButtonComponent->setBounds();
     playButtonComponent->queryTexture();
+
+    dummyButt = new SelectButton(context->renderer, "Dummy");
+    dummyButt->setSelectGroup(&playSelectGroup);
+    dummyButt->setBounds();
+    dummyButt->queryTexture();
 }
 
 LobbyWindow::~LobbyWindow() { 
+    delete dummyButt;
     delete playButtonComponent;
 
     SDL_DestroyTexture(serverList);
@@ -159,6 +166,16 @@ void LobbyWindow::prepareServerList() const {
 
     playButtonComponent->render();
 
+    SDL_FRect dummyButtBounds = dummyButt->getBounds();
+    dummyButt->setPos(
+        static_cast<float>((serverList->w - dummyButtBounds.w) / 2),
+        playButtonComponent->getBounds().y - dummyButtBounds.h - ServerVisual::gap
+    );
+
+    dummyButt->setAbsPoint(getServerListOffset());
+
+    dummyButt->render();
+
     SDL_SetRenderTarget(context->renderer, nullptr);
 }
 
@@ -203,6 +220,7 @@ void LobbyWindow::render() {
     
     handleHover();
     playButtonComponent->handleMouseEvents();
+    dummyButt->handleMouseEvents();
 
     prepareServerList();
 

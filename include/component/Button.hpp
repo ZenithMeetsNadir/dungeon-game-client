@@ -16,8 +16,21 @@ class Button {
         SDL_Texture *texture{ nullptr };
         SDL_Renderer *renderer;
 
+        bool hovered{ false };
+        bool pressed{ false };
+
         void createTexture();
         void invalidateTexture();
+
+        virtual void determineBackColor();
+        /// @brief Empty in base class, no need to call the base implementation when overriding.
+        virtual void onHover();
+        /// @brief Empty in base class, no need to call the base implementation when overriding.
+        virtual void onLeave();
+        /// @brief Empty in base class, no need to call the base implementation when overriding.
+        virtual void onClick();
+        /// @brief Empty in base class, no need to call the base implementation when overriding.
+        virtual void onRelease();
 
         static const int padding = 20;
         static const SDL_Color textColor;
@@ -27,7 +40,7 @@ class Button {
 
     public:
         Button(SDL_Renderer *renderer, const std::string &text = "");
-        ~Button();
+        virtual ~Button();
 
         void setText(const std::string &newText);
         /// @brief set w to -1 to use the width of the text.
@@ -37,8 +50,8 @@ class Button {
         void setAbsPoint(SDL_FPoint point);
         SDL_Texture *queryTexture();
 
-        void handleMouseEvents();
-        void render();
+        virtual void handleMouseEvents();
+        virtual void render();
 };
 
 inline void Button::invalidateTexture() {

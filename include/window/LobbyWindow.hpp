@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <component/Button.hpp>
+#include <component/SelectButton.hpp>
 
 class LobbyWindow : public Window {
     protected:
@@ -35,7 +36,9 @@ class LobbyWindow : public Window {
         std::vector<ServerVisual *> serverVisuals;
         SDL_Texture *serverList;
 
-        Button *playButtonComponent;
+        SelectButton *dummyButt;
+        SelectButton *playButtonComponent;
+        bool *playSelectGroup{ nullptr };
 
         /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
