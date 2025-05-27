@@ -14,49 +14,38 @@
 class LobbyWindow : public Window {
     protected:
         struct ServerVisual {
-            SDL_FRect box;
-            SDL_Texture *texture{ nullptr };
+            SelectButton *button;
             LanLobbyClient::GameServerInfo serverInfo;
-
-            bool hovered{ false };
 
             static const int width = 600;
             static const int padding = 20;
             static const int gap = 20;
             static const SDL_Color textColor;
 
-            ServerVisual(const LanLobbyClient::GameServerInfo &serverInfo);
+            ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo);
             ~ServerVisual();
         };
-
-        bool mousePressed{ false };
 
         LanLobbyClient *lanLobby;
 
         std::vector<ServerVisual *> serverVisuals;
         SDL_Texture *serverList;
+        bool serverListDirty{ true };
+        bool *modeSelect{ nullptr };
 
-        SelectButton *dummyButt;
-        SelectButton *playButtonComponent;
-        bool *playSelectGroup{ nullptr };
+        Button *playButtonComponent;
 
         /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
-        /// @brief Destroy all textures in serverVisuals and set them to nullptr.
-        void invalidateServerVisuals();
-        /// @brief Create textures for all serverVisuals that do not have a texture yet.
-        void updateServerVisuals();
 
-        SDL_Texture *createServerVisual(const LanLobbyClient::GameServerInfo &serverInfo) const;
-
+        /// @brief Invalidate the server list texture, so it will be recreated on the next render.
+        void invalidateServerList();
         /// @brief Update dimensions of the server list texture.
-        void updateServerListTexture();
+        void updateServerListDimenstions();
         /// @brief Prerender the server list texture.
         void prepareServerList() const;
 
         SDL_FPoint getServerListOffset() const;
-
-        void handleHover();
 
     public: 
         LobbyWindow(Context *context, TTF_Font *font);
@@ -66,13 +55,19 @@ class LobbyWindow : public Window {
         void render() override;
 };
 
-inline LobbyWindow::ServerVisual::ServerVisual(const LanLobbyClient::GameServerInfo &serverInfo)
+inline LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo)
     : serverInfo(serverInfo) 
-{ }
+{
+    button = new SelectButton(self->context->renderer, serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
+    button->setSelectGroup(&self->modeSelect);
+}
 
 inline LobbyWindow::ServerVisual::~ServerVisual() {
-    if (texture) 
-        SDL_DestroyTexture(texture);
+    delete button;
+}
+
+inline void LobbyWindow::invalidateServerList() {
+    serverListDirty = true;
 }
 
 inline SDL_FPoint LobbyWindow::getServerListOffset() const {

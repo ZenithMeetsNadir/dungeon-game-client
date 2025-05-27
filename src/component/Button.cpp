@@ -44,12 +44,21 @@ void Button::createTexture() {
     }
 }
 
+void Button::determineBackColor() {
+    backColor = pressed ? pressedColor : (hovered ? hoverColor : idleColor);
+}
+
+void Button::onHover() { }
+void Button::onLeave() { }
+void Button::onClick() { }
+void Button::onRelease() { }
+
 void Button::handleMouseEvents() {
     float mx, my;
     SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
 
-    mx -= absPoint.x;
-    my -= absPoint.y;
+    mx -= relPoint.x;
+    my -= relPoint.y;
     SDL_FPoint mousePos = { mx, my };
 
     bool oldHovered = hovered;
@@ -66,14 +75,35 @@ void Button::handleMouseEvents() {
     determineBackColor();
 }
 
-void Button::determineBackColor() {
-    backColor = pressed ? pressedColor : (hovered ? hoverColor : idleColor);
-}
+void Button::handleMouseEvents(const SDL_Event &event) {
+    bool oldHovered = hovered;
+    SDL_FPoint mousePos = { event.motion.x - relPoint.x, event.motion.y - relPoint.y };
 
-void Button::onHover() { }
-void Button::onLeave() { }
-void Button::onClick() { }
-void Button::onRelease() { }
+    switch (event.type) {
+        case SDL_EVENT_MOUSE_MOTION:
+            hovered = SDL_PointInRectFloat(&mousePos, &bounds);
+
+            if (hovered != oldHovered)
+                hovered ? onHover() : onLeave();
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            if (event.button.button == SDL_BUTTON_LEFT && hovered) {
+                pressed = true;
+                onClick();
+            }
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            if (event.button.button == SDL_BUTTON_LEFT && pressed) {
+                pressed = false;
+                onRelease();
+            }
+            break;
+    }
+
+    determineBackColor();
+}
 
 void Button::render() {
     if (!texture)

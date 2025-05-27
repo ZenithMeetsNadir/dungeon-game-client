@@ -11,8 +11,8 @@ class Button {
     protected:
         std::string text;
         SDL_FRect bounds{ 0, 0, 0, 0 };
-        SDL_FPoint absPoint{ 0, 0 };
-        SDL_Color backColor{ 0, 0, 0, 0 };
+        SDL_FPoint relPoint{ 0, 0 };
+        SDL_Color backColor{ idleColor };
         SDL_Texture *texture{ nullptr };
         SDL_Renderer *renderer;
 
@@ -47,10 +47,11 @@ class Button {
         void setBounds(float x = 0, float y = 0, float w = -1);
         SDL_FRect getBounds() const;
         void setPos(float x, float y);
-        void setAbsPoint(SDL_FPoint point);
+        void setRelPoint(SDL_FPoint point);
         SDL_Texture *queryTexture();
 
         virtual void handleMouseEvents();
+        virtual void handleMouseEvents(const SDL_Event &event);
         virtual void render();
 };
 
@@ -87,8 +88,8 @@ inline SDL_FRect Button::getBounds() const {
     return bounds;
 }
 
-inline void Button::setAbsPoint(SDL_FPoint point) {
-    absPoint = point;
+inline void Button::setRelPoint(SDL_FPoint point) {
+    relPoint = point;
 }
 
 inline SDL_Texture *Button::queryTexture() {
