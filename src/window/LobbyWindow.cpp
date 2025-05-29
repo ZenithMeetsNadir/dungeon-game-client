@@ -86,11 +86,12 @@ void LobbyWindow::prepareServerList() const {
     SDL_RenderClear(context->renderer);
 
     float y = ServerVisual::gap;
+    SDL_FPoint serverListOffset = getServerListOffset();
 
     for (auto serverVisual : serverVisuals) {
         serverVisual->button->setBounds(0, y, serverList->w);
 
-        serverVisual->button->setRelPoint(getServerListOffset());
+        serverVisual->button->setRelPoint(serverListOffset);
         serverVisual->button->render();
 
         y += serverVisual->button->getBounds().h + ServerVisual::gap;
@@ -102,7 +103,7 @@ void LobbyWindow::prepareServerList() const {
         height - playButtonBounds.h - ServerVisual::gap
     );
 
-    playButtonComponent->setRelPoint(getServerListOffset());
+    playButtonComponent->setRelPoint(serverListOffset);
     playButtonComponent->render();
 
     SDL_SetRenderTarget(context->renderer, nullptr);

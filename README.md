@@ -23,7 +23,7 @@ Additional required tools: `mingw`
 
 2. Create build files:
 
-        cmake -B build -D CMAKE_INSTALL_PREFIX=. -G MinGW Makefiles"
+        cmake -B build -D CMAKE_INSTALL_PREFIX=. -G "MinGW Makefiles"
 
 #### Linux
 
