@@ -2,11 +2,10 @@
 #define SELECTBUTTON_HPP
 
 #include "Button.hpp"
-#include <functional>
 
 class SelectButton : public Button {
     private:
-        bool *selected;
+        bool selected;
         bool **selectGroup{ nullptr };
 
         void determineBackColor() override;
@@ -24,7 +23,7 @@ class SelectButton : public Button {
 };
 
 inline bool SelectButton::isSelected() const {
-    return *selected;
+    return selected;
 }
 
 #endif

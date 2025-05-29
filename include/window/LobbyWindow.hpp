@@ -8,7 +8,6 @@
 #include <SDL3_image/SDL_image.h>
 #include <vector>
 #include <string>
-#include <functional>
 #include <component/Button.hpp>
 #include <component/SelectButton.hpp>
 

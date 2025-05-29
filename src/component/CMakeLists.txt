@@ -1,5 +1,10 @@
-add_library(component STATIC Button.cpp SelectButton.cpp)
-target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
+add_library(component STATIC 
+    Component.cpp 
+    Button.cpp 
+    SelectButton.cpp 
+    PauseOverlay.cpp
+)
+#target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 if(WIN32)
     #set(SDL3_ttf_DIR "C:\\Users\\marti\\vcpkg\\packages\\sdl3-ttf_x64-windows\\share\\sdl3_ttf")

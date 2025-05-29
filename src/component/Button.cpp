@@ -1,12 +1,11 @@
 #include <component/Button.hpp>
 
-const SDL_Color Button::textColor = { 255, 255, 255, 255 };
 const SDL_Color Button::idleColor = { 60, 60, 60, 255 };
 const SDL_Color Button::hoverColor = { 80, 80, 120, 255 };
 const SDL_Color Button::pressedColor = { 120, 120, 180, 255 };
 
 Button::Button(SDL_Renderer *renderer, const std::string &text)
-    : text(text), renderer(renderer)
+    : Component(renderer), text(text)
 { }
 
 Button::~Button() {

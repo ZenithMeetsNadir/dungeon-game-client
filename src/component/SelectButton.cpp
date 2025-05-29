@@ -3,41 +3,40 @@
 SelectButton::SelectButton(SDL_Renderer *renderer, const std::string &text)
     : Button(renderer, text)
 { 
-    selected = new bool(false);
+
 }
 
 SelectButton::~SelectButton() {
     setSelectGroup(nullptr);
-    delete selected;
 }
 
 void SelectButton::determineBackColor() {
-    backColor = *selected ? pressedColor : (hovered ? hoverColor : idleColor);
+    backColor = selected ? pressedColor : (hovered ? hoverColor : idleColor);
 }
 
 void SelectButton::onClick() {
-    *selected ? deselect() : select();
+    selected ? deselect() : select();
 }
 
 void SelectButton::setSelectGroup(bool **selectGroup) {
-    if (this->selectGroup && *this->selectGroup == selected)
+    if (this->selectGroup && *this->selectGroup == &selected)
         *this->selectGroup = nullptr;
 
     this->selectGroup = selectGroup;
 }
 
 void SelectButton::select() {
-    *selected = true;
+    selected = true;
     if (selectGroup) {
         if (*selectGroup)
             **selectGroup = false; // deselect the previous selection
 
-        *selectGroup = selected;
+        *selectGroup = &selected;
     }
 }
 
 void SelectButton::deselect() {
-    *selected = false;
+    selected = false;
     if (selectGroup)
         *selectGroup = nullptr;
 }
