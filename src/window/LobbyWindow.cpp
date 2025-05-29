@@ -17,14 +17,20 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
 
     serverVisuals = std::vector<ServerVisual *>();
     updateServerListDimenstions();
+
+    singlePlayer = new SelectButton(context->renderer, "Singleplayer");
+    singlePlayer->setWidth();;
+    singlePlayer->queryTexture();
+    singlePlayer->setSelectGroup(&modeSelectGroup);
     
-    playButtonComponent = new Button(context->renderer, "Play");
-    playButtonComponent->setBounds();
-    playButtonComponent->queryTexture();
+    playButton = new Button(context->renderer, "Play");
+    playButton->setWidth();
+    playButton->queryTexture();
 }
 
 LobbyWindow::~LobbyWindow() { 
-    delete playButtonComponent;
+    delete playButton;
+    delete singlePlayer;
 
     SDL_DestroyTexture(serverList);
 
@@ -90,21 +96,24 @@ void LobbyWindow::prepareServerList() const {
 
     for (auto serverVisual : serverVisuals) {
         serverVisual->button->setBounds(0, y, serverList->w);
-
         serverVisual->button->setRelPoint(serverListOffset);
         serverVisual->button->render();
-
         y += serverVisual->button->getBounds().h + ServerVisual::gap;
     }
 
-    SDL_FRect playButtonBounds = playButtonComponent->getBounds();
-    playButtonComponent->setPos(
+    singlePlayer->setBounds(0, y, serverList->w);
+    singlePlayer->setRelPoint(serverListOffset);
+    singlePlayer->render();
+    y += singlePlayer->getBounds().h + ServerVisual::gap;
+
+    SDL_FRect playButtonBounds = playButton->getBounds();
+    playButton->setPos(
         static_cast<float>((serverList->w - playButtonBounds.w) / 2),
         height - playButtonBounds.h - ServerVisual::gap
     );
 
-    playButtonComponent->setRelPoint(serverListOffset);
-    playButtonComponent->render();
+    playButton->setRelPoint(serverListOffset);
+    playButton->render();
 
     SDL_SetRenderTarget(context->renderer, nullptr);
 }
@@ -122,12 +131,16 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
         serverVisual->button->handleMouseEvents(event);
     }
 
-    playButtonComponent->handleMouseEvents(event);
+    playButton->handleMouseEvents(event);
+    singlePlayer->handleMouseEvents(event);
 
     invalidateServerList();
 }
 
 void LobbyWindow::render() {
+    if (!graphicsDirty)
+        return;
+
     matchServerVisuals();
 
     if (serverListDirty) {
@@ -156,4 +169,6 @@ void LobbyWindow::render() {
     SDL_DestroyTexture(tex);*/
 
     SDL_RenderPresent(context->renderer);
+
+    graphicsDirty = false;
 }

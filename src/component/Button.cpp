@@ -7,9 +7,7 @@ const SDL_Color Button::pressedColor = { 120, 120, 180, 255 };
 
 Button::Button(SDL_Renderer *renderer, const std::string &text)
     : text(text), renderer(renderer)
-{
-    
-}
+{ }
 
 Button::~Button() {
     if (texture)
@@ -45,7 +43,7 @@ void Button::createTexture() {
 }
 
 void Button::determineBackColor() {
-    backColor = pressed ? pressedColor : (hovered ? hoverColor : idleColor);
+    backColor = isPressed() ? pressedColor : (hovered ? hoverColor : idleColor);
 }
 
 void Button::onHover() { }
@@ -101,13 +99,13 @@ void Button::handleMouseEvents(const SDL_Event &event) {
             }
             break;
     }
-
-    determineBackColor();
 }
 
 void Button::render() {
     if (!texture)
         createTexture();
+
+    determineBackColor();
 
     SDL_SetRenderDrawColor(renderer, backColor.r, backColor.g, backColor.b, backColor.a);
     SDL_RenderFillRect(renderer, &bounds);

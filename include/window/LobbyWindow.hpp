@@ -8,6 +8,7 @@
 #include <SDL3_image/SDL_image.h>
 #include <vector>
 #include <string>
+#include <functional>
 #include <component/Button.hpp>
 #include <component/SelectButton.hpp>
 
@@ -31,9 +32,10 @@ class LobbyWindow : public Window {
         std::vector<ServerVisual *> serverVisuals;
         SDL_Texture *serverList;
         bool serverListDirty{ true };
-        bool *modeSelect{ nullptr };
+        bool *modeSelectGroup{ nullptr };
 
-        Button *playButtonComponent;
+        SelectButton *singlePlayer;
+        Button *playButton;
 
         /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
@@ -59,7 +61,7 @@ inline LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobby
     : serverInfo(serverInfo) 
 {
     button = new SelectButton(self->context->renderer, serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
-    button->setSelectGroup(&self->modeSelect);
+    button->setSelectGroup(&self->modeSelectGroup);
 }
 
 inline LobbyWindow::ServerVisual::~ServerVisual() {
@@ -68,6 +70,7 @@ inline LobbyWindow::ServerVisual::~ServerVisual() {
 
 inline void LobbyWindow::invalidateServerList() {
     serverListDirty = true;
+    invalidate();
 }
 
 inline SDL_FPoint LobbyWindow::getServerListOffset() const {

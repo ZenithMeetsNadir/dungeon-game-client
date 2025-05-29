@@ -43,12 +43,16 @@ class Button {
         virtual ~Button();
 
         void setText(const std::string &newText);
-        /// @brief set w to -1 to use the width of the text.
         void setBounds(float x = 0, float y = 0, float w = -1);
         SDL_FRect getBounds() const;
+        /// @brief set w to -1 to use the width of the text.
+        void setWidth(float w = -1);
         void setPos(float x, float y);
         void setRelPoint(SDL_FPoint point);
         SDL_Texture *queryTexture();
+
+        bool isHovered() const;
+        bool isPressed() const;
 
         virtual void handleMouseEvents();
         virtual void handleMouseEvents(const SDL_Event &event);
@@ -73,6 +77,14 @@ inline void Button::setBounds(float x, float y, float w) {
     bounds.x = x;
     bounds.y = y;
 
+    setWidth(w);
+}
+
+inline void Button::setRelPoint(SDL_FPoint point) {
+    relPoint = point;
+}
+
+inline void Button::setWidth(float w) {
     if (w < 0 && texture)
         bounds.w = texture->w + 2 * padding;
     else
@@ -88,15 +100,19 @@ inline SDL_FRect Button::getBounds() const {
     return bounds;
 }
 
-inline void Button::setRelPoint(SDL_FPoint point) {
-    relPoint = point;
-}
-
 inline SDL_Texture *Button::queryTexture() {
     if (!texture)
         createTexture();
     
     return texture;
+}
+
+inline bool Button::isHovered() const {
+    return hovered;
+}
+
+inline bool Button::isPressed() const {
+    return hovered && pressed;
 }
 
 #endif

@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
             lobbyWindow->handleEvent(event);
         }
-
+        
         lobbyWindow->render();
     }
 
