@@ -18,19 +18,30 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     serverVisuals = std::vector<ServerVisual *>();
     updateServerListDimenstions();
 
-    singlePlayer = new SelectButton(context->renderer, "Singleplayer");
-    singlePlayer->setWidth();;
-    singlePlayer->queryTexture();
-    singlePlayer->setSelectGroup(&modeSelectGroup);
-    
-    playButton = new Button(context->renderer, "Play");
+    remoteServer = new SelectButton(context);
+    remoteServer->setText("Connect to a remote server");
+    remoteServer->setFocusGroup(&focusGroup);
+    remoteServer->setSelectGroup(&modeSelectGroup);
+    remoteServer->setWidth();
+    remoteServer->queryTexture();
+
+    remoteIp = new TextInput(context);
+    remoteIp->setPlaceholder("Enter server ip (ip:port)");
+    remoteIp->setFocusGroup(&focusGroup);
+    remoteIp->queryTexture();
+    remoteIp->lockHeight();
+
+    playButton = new Button(context);
+    playButton->setText("Play");
+    playButton->setFocusGroup(&focusGroup);
     playButton->setWidth();
     playButton->queryTexture();
 }
 
 LobbyWindow::~LobbyWindow() { 
     delete playButton;
-    delete singlePlayer;
+    delete remoteIp;
+    delete remoteServer;
 
     SDL_DestroyTexture(serverList);
 
@@ -73,7 +84,6 @@ void LobbyWindow::matchServerVisuals() {
             serverVisuals.push_back(new ServerVisual(this, serverInfo));
             invalidateServerList();
         }
-            
     }
 }
 
@@ -101,10 +111,16 @@ void LobbyWindow::prepareServerList() const {
         y += serverVisual->button->getBounds().h + ServerVisual::gap;
     }
 
-    singlePlayer->setBounds(0, y, serverList->w);
-    singlePlayer->setRelPoint(serverListOffset);
-    singlePlayer->render();
-    y += singlePlayer->getBounds().h + ServerVisual::gap;
+    remoteServer->setBounds(0, y, serverList->w);
+    remoteServer->setRelPoint(serverListOffset);
+    remoteServer->render();
+    y += remoteServer->getBounds().h + ServerVisual::gap;
+
+    remoteIp->enabled = remoteServer->isSelected();
+    remoteIp->setBounds(0, y, serverList->w);
+    remoteIp->setRelPoint(serverListOffset);
+    remoteIp->render();
+    y += remoteIp->enabled ? remoteIp->getBounds().h + ServerVisual::gap : 0;
 
     SDL_FRect playButtonBounds = playButton->getBounds();
     playButton->setPos(
@@ -131,8 +147,9 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
         serverVisual->button->handleMouseEvents(event);
     }
 
+    remoteServer->handleMouseEvents(event);
+    remoteIp->handleMouseEvents(event);
     playButton->handleMouseEvents(event);
-    singlePlayer->handleMouseEvents(event);
 
     invalidateServerList();
 }
@@ -148,7 +165,7 @@ void LobbyWindow::render() {
         serverListDirty = false;
     }
 
-    SDL_SetRenderDrawColor(context->renderer, 30, 30, 30, 255);
+    SDL_SetRenderDrawColor(context->renderer, windowColor.r, windowColor.g, windowColor.b, windowColor.a);
     SDL_RenderClear(context->renderer);
 
     SDL_FPoint serverListOffset = getServerListOffset();

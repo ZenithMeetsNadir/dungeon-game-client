@@ -15,6 +15,8 @@ class Window {
 
         bool graphicsDirty{ true };
 
+        static const SDL_Color windowColor;
+
     public:
         Window(Context *context, TTF_Font *font);
         virtual ~Window();

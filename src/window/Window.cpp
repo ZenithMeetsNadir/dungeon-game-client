@@ -1,7 +1,9 @@
 #include <window/Window.hpp>
 
+const SDL_Color Window::windowColor = { 0x20, 0x20, 0x20, 0xFF };
+
 Window::Window(Context *context, TTF_Font *font)
-    : context(context), font(font) 
+    : context(context), font(font)
 { }
 
 Window::~Window() { }

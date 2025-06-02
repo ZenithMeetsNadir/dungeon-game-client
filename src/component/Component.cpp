@@ -1,9 +1,10 @@
 #include <component/Component.hpp>
 
+const SDL_Color Component::idleColor = { 0x30, 0x30, 0x30, 0xFF };
 const SDL_Color Component::textColor = { 255, 255, 255, 255 };
 
-Component::Component(SDL_Renderer *renderer)
-    : renderer(renderer) 
+Component::Component(Context *context)
+    : context(context) 
 { }
 
 Component::~Component() {

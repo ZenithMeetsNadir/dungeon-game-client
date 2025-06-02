@@ -15,7 +15,7 @@ target_link_libraries(context PUBLIC
     SDL3::SDL3
 )
 
-add_library(window STATIC Window.cpp LobbyWindow.cpp GameWindow.cpp)
+add_library(window STATIC Window.cpp LobbyWindow.cpp) #GameWindow.cpp)
 target_include_directories(window PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(window PUBLIC

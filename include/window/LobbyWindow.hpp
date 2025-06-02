@@ -10,6 +10,8 @@
 #include <string>
 #include <component/Button.hpp>
 #include <component/SelectButton.hpp>
+#include <component/FocusComponent.hpp>
+#include <component/TextInput.hpp>
 
 class LobbyWindow : public Window {
     protected:
@@ -32,8 +34,10 @@ class LobbyWindow : public Window {
         SDL_Texture *serverList;
         bool serverListDirty{ true };
         bool *modeSelectGroup{ nullptr };
+        FocusComponent *focusGroup{ nullptr };
 
-        SelectButton *singlePlayer;
+        SelectButton *remoteServer;
+        TextInput *remoteIp;
         Button *playButton;
 
         /// @brief Match the queried server list with serverVisuals.
@@ -59,7 +63,8 @@ class LobbyWindow : public Window {
 inline LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo)
     : serverInfo(serverInfo) 
 {
-    button = new SelectButton(self->context->renderer, serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
+    button = new SelectButton(self->context);
+    button->setText(serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
     button->setSelectGroup(&self->modeSelectGroup);
 }
 

@@ -1,20 +1,19 @@
 #include <component/SelectButton.hpp>
 
-SelectButton::SelectButton(SDL_Renderer *renderer, const std::string &text)
-    : Button(renderer, text)
-{ 
-
-}
+SelectButton::SelectButton(Context *context)
+    : Button(context)
+{ }
 
 SelectButton::~SelectButton() {
     setSelectGroup(nullptr);
 }
 
-void SelectButton::determineBackColor() {
-    backColor = selected ? pressedColor : (hovered ? hoverColor : idleColor);
+void SelectButton::determineColor() {
+    backColor = selected ? pressedBackColor : (hovered ? hoverBackColor : idleColor);
 }
 
 void SelectButton::onClick() {
+    Button::onClick();
     selected ? deselect() : select();
 }
 
@@ -37,6 +36,6 @@ void SelectButton::select() {
 
 void SelectButton::deselect() {
     selected = false;
-    if (selectGroup)
+    if (selectGroup && *selectGroup == &selected)
         *selectGroup = nullptr;
 }

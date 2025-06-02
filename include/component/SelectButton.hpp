@@ -4,15 +4,15 @@
 #include "Button.hpp"
 
 class SelectButton : public Button {
-    private:
-        bool selected;
+    protected:
+        bool selected{ false };
         bool **selectGroup{ nullptr };
 
-        void determineBackColor() override;
+        void determineColor() override;
         void onClick() override;
 
     public:
-        SelectButton(SDL_Renderer *renderer, const std::string &text = "");
+        SelectButton(Context *context);
         ~SelectButton() override;
 
         void setSelectGroup(bool **selectGroup);

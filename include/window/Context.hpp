@@ -11,11 +11,11 @@ struct Context {
     SDL_Window *window{ nullptr };
     SDL_Renderer *renderer{ nullptr };
 
-    static TTF_Font *font_psp2;
-
     const char *title;
     int initWidth;
     int initHeight;
+
+    static TTF_Font *font_psp2;
 
     Context(const char *title, int width, int height);
     ~Context();

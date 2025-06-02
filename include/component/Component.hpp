@@ -1,11 +1,12 @@
 #ifndef COMPONENT_HPP
 #define COMPONENT_HPP
 
+#include <window/Context.hpp>
 #include <sdls.h>
 
 class Component {
     protected:
-        SDL_Renderer *renderer;
+        Context *context;
         SDL_Texture *texture{ nullptr };
         SDL_FRect bounds{ 0, 0, 0, 0 };
         SDL_FPoint relPoint{ 0, 0 };
@@ -13,14 +14,21 @@ class Component {
         virtual void createTexture() = 0;
         void invalidateTexture();
 
+        static const int padding = 20;
+        static const SDL_Color idleColor;
         static const SDL_Color textColor;
 
     public:
-        Component(SDL_Renderer *renderer);
+        Component(Context *context);
         virtual ~Component();
 
         void setBounds(const SDL_FRect &newBounds);
         SDL_FRect getBounds() const;
+        /// @brief set w to -1 to use the width of the texture.
+        void setBounds(float x = 0, float y = 0, float w = -1);
+        /// @brief set w to -1 to use the width of the texture.
+        void setWidth(float w = -1);
+        void setPos(float x, float y);
         void setRelPoint(const SDL_FPoint &point);
         SDL_FPoint getRelPoint() const;
         SDL_Texture *queryTexture();
@@ -43,6 +51,25 @@ inline void Component::setBounds(const SDL_FRect &newBounds) {
 
 inline SDL_FRect Component::getBounds() const {
     return bounds;
+}
+
+inline void Component::setBounds(float x, float y, float w) {
+    bounds.x = x;
+    bounds.y = y;
+
+    setWidth(w);
+}
+
+inline void Component::setWidth(float w) {
+    if (w < 0 && texture)
+        bounds.w = texture->w + 2 * padding;
+    else
+        bounds.w = w;
+}
+
+inline void Component::setPos(float x, float y) {
+    bounds.x = x;
+    bounds.y = y;
 }
 
 inline void Component::setRelPoint(const SDL_FPoint &point) {
