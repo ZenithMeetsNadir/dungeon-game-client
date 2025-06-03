@@ -137,21 +137,25 @@ void LobbyWindow::prepareServerList() const {
 void LobbyWindow::handleEvent(const SDL_Event &event) {
     Window::handleEvent(event);
 
+    bool dirty = false;
+
     switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
             updateServerListDimenstions();
+            dirty |= true;
             break;
     }
 
     for (auto serverVisual : serverVisuals) {
-        serverVisual->button->handleMouseEvents(event);
+        dirty |= serverVisual->button->handleMouseEvents(event);
     }
 
-    remoteServer->handleMouseEvents(event);
-    remoteIp->handleMouseEvents(event);
-    playButton->handleMouseEvents(event);
+    dirty |= remoteServer->handleMouseEvents(event);
+    dirty |= remoteIp->handleMouseEvents(event);
+    dirty |= playButton->handleMouseEvents(event);
 
-    invalidateServerList();
+    if (dirty)
+        invalidateServerList();
 }
 
 void LobbyWindow::render() {

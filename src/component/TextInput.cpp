@@ -51,8 +51,8 @@ void TextInput::unfocus() {
     SDL_StopTextInput(context->window);
 }
 
-void TextInput::handleMouseEvents(const SDL_Event &event) {
-    FocusComponent::handleMouseEvents(event);
+bool TextInput::handleMouseEvents(const SDL_Event &event) {
+    bool dirty = FocusComponent::handleMouseEvents(event);
 
     switch (event.type) {
         case SDL_EVENT_TEXT_INPUT: {
@@ -60,6 +60,8 @@ void TextInput::handleMouseEvents(const SDL_Event &event) {
                 text += event.text.text;
 
             invalidateTexture();
+        
+            dirty |= true;
             break;
         }
         case SDL_EVENT_KEY_DOWN: {
@@ -67,11 +69,15 @@ void TextInput::handleMouseEvents(const SDL_Event &event) {
                 text.pop_back();
 
             invalidateTexture();
+
+            dirty |= true;
             break;
         }
     }
 
     determineColor();
+
+    return dirty;
 }
 
 void TextInput::render() {

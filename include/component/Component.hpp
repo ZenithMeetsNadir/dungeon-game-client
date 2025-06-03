@@ -33,8 +33,8 @@ class Component {
         SDL_FPoint getRelPoint() const;
         SDL_Texture *queryTexture();
 
-        virtual void handleMouseEvents() = 0;
-        virtual void handleMouseEvents(const SDL_Event &event) = 0;
+        virtual bool handleMouseEvents() = 0;
+        virtual bool handleMouseEvents(const SDL_Event &event) = 0;
         virtual void render() = 0;
 };
 

@@ -29,7 +29,7 @@ class TextInput : public FocusComponent {
 
         void focus() override;
         void unfocus() override;
-        void handleMouseEvents(const SDL_Event &event) override;
+        bool handleMouseEvents(const SDL_Event &event) override;
         void render() override;
 };
 

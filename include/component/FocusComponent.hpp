@@ -37,8 +37,8 @@ class FocusComponent : public Component {
         bool isHovered() const;
         bool isPressed() const;
 
-        void handleMouseEvents() override;
-        void handleMouseEvents(const SDL_Event &event) override;
+        bool handleMouseEvents() override;
+        bool handleMouseEvents(const SDL_Event &event) override;
         void render() override;
 };
 

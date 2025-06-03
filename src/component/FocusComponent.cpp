@@ -41,9 +41,11 @@ void FocusComponent::unfocus() {
         *focusGroup = nullptr;
 }
 
-void FocusComponent::handleMouseEvents() {
+bool FocusComponent::handleMouseEvents() {
     if (!enabled)
-        return;
+        return false;
+
+    bool dirty = false;
 
     float mx, my;
     SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
@@ -57,18 +59,26 @@ void FocusComponent::handleMouseEvents() {
     hovered = SDL_PointInRectFloat(&mousePos, &bounds);
     pressed =  hovered && mouseState & SDL_BUTTON_MASK(SDL_BUTTON_LEFT);
 
-    if (hovered != oldHovered)
+    if (hovered != oldHovered) {
         hovered ? onHover() : onLeave();
+        dirty = true;
+    }
 
-    if (pressed != oldPressed) 
+    if (pressed != oldPressed) {
         pressed ? onClick() : onRelease();
+        dirty = true;
+    }
 
     determineColor();
+
+    return dirty;
 }
 
-void FocusComponent::handleMouseEvents(const SDL_Event &event) {
+bool FocusComponent::handleMouseEvents(const SDL_Event &event) {
     if (!enabled)
-        return;
+        return false;
+
+    bool dirty = false;
 
     bool oldHovered = hovered;
     SDL_FPoint mousePos = { event.motion.x - relPoint.x, event.motion.y - relPoint.y };
@@ -77,14 +87,18 @@ void FocusComponent::handleMouseEvents(const SDL_Event &event) {
         case SDL_EVENT_MOUSE_MOTION:
             hovered = SDL_PointInRectFloat(&mousePos, &bounds);
 
-            if (hovered != oldHovered)
+            if (hovered != oldHovered) {
                 hovered ? onHover() : onLeave();
+                dirty |= true;
+            }
+
             break;
 
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
             if (event.button.button == SDL_BUTTON_LEFT && hovered) {
                 pressed = true;
                 onClick();
+                dirty |= true;
             }
             break;
 
@@ -92,11 +106,14 @@ void FocusComponent::handleMouseEvents(const SDL_Event &event) {
             if (event.button.button == SDL_BUTTON_LEFT && pressed) {
                 pressed = false;
                 onRelease();
+                dirty |= true;
             }
             break;
     }
 
     determineColor();
+
+    return dirty;
 }
 
 void FocusComponent::render() {
