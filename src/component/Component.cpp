@@ -11,3 +11,16 @@ Component::~Component() {
     if (texture)
         SDL_DestroyTexture(texture);
 }
+
+void Component::attach() {
+    attached = true;
+}
+
+void Component::detach() {
+    attached = false;
+    clearState();
+}
+
+bool Component::handleMouseEvents() {
+    return false;
+}

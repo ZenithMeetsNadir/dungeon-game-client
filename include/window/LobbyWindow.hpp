@@ -12,6 +12,7 @@
 #include <component/SelectButton.hpp>
 #include <component/FocusComponent.hpp>
 #include <component/TextInput.hpp>
+#include <component/PauseOverlay.hpp>
 
 class LobbyWindow : public Window {
     protected:
@@ -36,9 +37,11 @@ class LobbyWindow : public Window {
         bool *modeSelectGroup{ nullptr };
         FocusComponent *focusGroup{ nullptr };
 
-        SelectButton *remoteServer;
-        TextInput *remoteIp;
-        Button *playButton;
+        SelectButton *remoteServer{ nullptr };
+        TextInput *remoteIp{ nullptr };
+        Button *playButton{ nullptr };
+
+        PauseOverlay *pauseOverlay{ nullptr };
 
         /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
@@ -51,6 +54,9 @@ class LobbyWindow : public Window {
         void prepareServerList() const;
 
         SDL_FPoint getServerListOffset() const;
+
+        void clearLobbyVolatileState();
+        void forceMotionRefresh();
 
     public: 
         LobbyWindow(Context *context, TTF_Font *font);
@@ -66,6 +72,7 @@ inline LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobby
     button = new SelectButton(self->context);
     button->setText(serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
     button->setSelectGroup(&self->modeSelectGroup);
+    button->setFocusGroup(&self->focusGroup);
 }
 
 inline LobbyWindow::ServerVisual::~ServerVisual() {

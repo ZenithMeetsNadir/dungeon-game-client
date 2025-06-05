@@ -51,8 +51,8 @@ void TextInput::unfocus() {
     SDL_StopTextInput(context->window);
 }
 
-bool TextInput::handleMouseEvents(const SDL_Event &event) {
-    bool dirty = FocusComponent::handleMouseEvents(event);
+bool TextInput::handleEvents(const SDL_Event &event) {
+    bool dirty = FocusComponent::handleEvents(event);
 
     switch (event.type) {
         case SDL_EVENT_TEXT_INPUT: {
@@ -81,7 +81,7 @@ bool TextInput::handleMouseEvents(const SDL_Event &event) {
 }
 
 void TextInput::render() {
-    if (!enabled)
+    if (!attached)
         return;
 
     if (!texture)

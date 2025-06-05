@@ -2,6 +2,7 @@
 #define FOCUSCOMPONENT_HPP
 
 #include "Component.hpp"
+#include <functional>
 
 class FocusComponent : public Component {
     protected:
@@ -14,6 +15,8 @@ class FocusComponent : public Component {
         SDL_Color foreColor{ textColor };
         SDL_Color backColor{ idleColor };
 
+        std::function<void()> onClickCallback;
+
         virtual void determineColor() = 0;
         virtual void onHover();
         virtual void onLeave();
@@ -24,21 +27,25 @@ class FocusComponent : public Component {
         static const SDL_Color hoverBackColor;
 
     public:
-        bool enabled{ true };
-
         FocusComponent(Context *context);
         ~FocusComponent();
 
         void setFocusGroup(FocusComponent **focusGroup);
         virtual void focus();
         virtual void unfocus();
+        void destroyFocus();
+
         bool isFocused() const;
+        void setOnClickListener(const std::function<void()> &callback);
 
         bool isHovered() const;
         bool isPressed() const;
 
+        void clearState() override;
+        void clearVolatileState() override;
+
         bool handleMouseEvents() override;
-        bool handleMouseEvents(const SDL_Event &event) override;
+        bool handleEvents(const SDL_Event &event) override;
         void render() override;
 };
 
@@ -46,12 +53,16 @@ inline bool FocusComponent::isFocused() const {
     return focused;
 }
 
+inline void FocusComponent::setOnClickListener(const std::function<void()> &callback) {
+    onClickCallback = callback;
+}
+
 inline bool FocusComponent::isHovered() const {
     return hovered;
 }
 
 inline bool FocusComponent::isPressed() const {
-    return pressed;
+    return pressed && hovered;
 }
 
 #endif

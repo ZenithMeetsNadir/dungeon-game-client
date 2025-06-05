@@ -24,6 +24,15 @@ void SelectButton::setSelectGroup(bool **selectGroup) {
     this->selectGroup = selectGroup;
 }
 
+void SelectButton::clearState() {
+    Button::clearState();
+    deselect();
+}
+
+void SelectButton::clearVolatileState() {
+    Button::clearVolatileState();
+}
+
 void SelectButton::select() {
     selected = true;
     if (selectGroup) {

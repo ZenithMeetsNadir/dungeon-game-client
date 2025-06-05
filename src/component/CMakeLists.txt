@@ -4,7 +4,7 @@ add_library(component STATIC
     Button.cpp 
     SelectButton.cpp 
     TextInput.cpp
-    #PauseOverlay.cpp
+    PauseOverlay.cpp
 )
 #target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
 

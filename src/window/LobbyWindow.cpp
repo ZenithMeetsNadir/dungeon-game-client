@@ -16,7 +16,6 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     }
 
     serverVisuals = std::vector<ServerVisual *>();
-    updateServerListDimenstions();
 
     remoteServer = new SelectButton(context);
     remoteServer->setText("Connect to a remote server");
@@ -36,6 +35,11 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     playButton->setFocusGroup(&focusGroup);
     playButton->setWidth();
     playButton->queryTexture();
+
+    pauseOverlay = new PauseOverlay(context);
+    pauseOverlay->setControlsFocusGroup(&focusGroup);
+
+    updateServerListDimenstions();
 }
 
 LobbyWindow::~LobbyWindow() { 
@@ -94,9 +98,20 @@ void LobbyWindow::updateServerListDimenstions() {
         SDL_TEXTUREACCESS_TARGET, 
         ServerVisual::width, height
     );
+
+    SDL_FRect pauseOverlayBounds{
+        0, 0,
+        static_cast<float>(width),
+        static_cast<float>(height)
+    };
+    pauseOverlay->setBounds(pauseOverlayBounds);
+
+    invalidateServerList();
+    invalidate();
 }
 
 void LobbyWindow::prepareServerList() const {
+    SDL_Texture *oldTarget = SDL_GetRenderTarget(context->renderer);
     SDL_SetRenderTarget(context->renderer, serverList);
     SDL_SetRenderDrawColor(context->renderer, 0, 0, 0, 0);
     SDL_RenderClear(context->renderer);
@@ -104,7 +119,7 @@ void LobbyWindow::prepareServerList() const {
     float y = ServerVisual::gap;
     SDL_FPoint serverListOffset = getServerListOffset();
 
-    for (auto serverVisual : serverVisuals) {
+    for (auto &serverVisual : serverVisuals) {
         serverVisual->button->setBounds(0, y, serverList->w);
         serverVisual->button->setRelPoint(serverListOffset);
         serverVisual->button->render();
@@ -116,11 +131,14 @@ void LobbyWindow::prepareServerList() const {
     remoteServer->render();
     y += remoteServer->getBounds().h + ServerVisual::gap;
 
-    remoteIp->enabled = remoteServer->isSelected();
+    bool remoteSelected = remoteServer->isSelected();
+    if (remoteSelected != remoteIp->isAttached())
+        remoteSelected ? remoteIp->attach() : remoteIp->detach();
+
     remoteIp->setBounds(0, y, serverList->w);
     remoteIp->setRelPoint(serverListOffset);
     remoteIp->render();
-    y += remoteIp->enabled ? remoteIp->getBounds().h + ServerVisual::gap : 0;
+    y += remoteSelected ? remoteIp->getBounds().h + ServerVisual::gap : 0;
 
     SDL_FRect playButtonBounds = playButton->getBounds();
     playButton->setPos(
@@ -131,38 +149,90 @@ void LobbyWindow::prepareServerList() const {
     playButton->setRelPoint(serverListOffset);
     playButton->render();
 
-    SDL_SetRenderTarget(context->renderer, nullptr);
+    SDL_SetRenderTarget(context->renderer, oldTarget);
+}
+
+void LobbyWindow::clearLobbyVolatileState() {
+    for (auto &serverVisual : serverVisuals) {
+        serverVisual->button->clearVolatileState();
+    }
+
+    remoteServer->clearVolatileState();
+    remoteIp->clearVolatileState();
+    playButton->clearVolatileState();
+
+    invalidateServerList();
+}
+
+void LobbyWindow::forceMotionRefresh() {
+    float mx, my;
+    SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
+
+    SDL_Event event;
+    event.type = SDL_EVENT_MOUSE_MOTION;
+    event.motion.x = mx;
+    event.motion.y = my;
+    event.motion.xrel = 0;
+    event.motion.yrel = 0;
+    event.motion.windowID = SDL_GetWindowID(context->window);
+    event.motion.which = SDL_TOUCH_MOUSEID;
+    event.motion.timestamp = SDL_GetTicksNS();
+    event.motion.state = mouseState;
+    event.motion.reserved = 0;
+
+    handleEvent(event);
 }
 
 void LobbyWindow::handleEvent(const SDL_Event &event) {
     Window::handleEvent(event);
 
-    bool dirty = false;
-
     switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
             updateServerListDimenstions();
-            dirty |= true;
             break;
     }
 
-    for (auto serverVisual : serverVisuals) {
-        dirty |= serverVisual->button->handleMouseEvents(event);
+    bool dirty = false;
+
+    dirty |= pauseOverlay->handleEvents(event);
+
+    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
+        pauseOverlay->isAttached() ? pauseOverlay->detach() : pauseOverlay->attach();
+
+        if (pauseOverlay->isAttached()) {
+            clearLobbyVolatileState();
+            pauseOverlay->clearVolatileState();
+        }     
+
+        forceMotionRefresh();
+        dirty |= true;
     }
 
-    dirty |= remoteServer->handleMouseEvents(event);
-    dirty |= remoteIp->handleMouseEvents(event);
-    dirty |= playButton->handleMouseEvents(event);
+    if (dirty)
+        invalidate();
+
+    dirty = false;
+
+    if (!pauseOverlay->isAttached()) {
+        for (auto &serverVisual : serverVisuals) {
+            dirty |= serverVisual->button->handleEvents(event);
+        }
+
+        dirty |= remoteServer->handleEvents(event);
+        dirty |= remoteIp->handleEvents(event);
+        dirty |= playButton->handleEvents(event);
+    }
 
     if (dirty)
-        invalidateServerList();
+        invalidateServerList();    
 }
 
 void LobbyWindow::render() {
+    if (SDL_GetTicks() % 1000 == 0)
+        matchServerVisuals();
+
     if (!graphicsDirty)
         return;
-
-    matchServerVisuals();
 
     if (serverListDirty) {
         prepareServerList();
@@ -181,6 +251,8 @@ void LobbyWindow::render() {
     };
 
     SDL_RenderTexture(context->renderer, serverList, nullptr, &box);
+
+    pauseOverlay->render();
 
     /*SDL_Texture* tex = IMG_LoadTexture(context->renderer, "C:\\Users\\marti\\programy\\angular\\pisq\\pisqapp\\src\\assets\\images\\debris.png");
     if (!tex) 

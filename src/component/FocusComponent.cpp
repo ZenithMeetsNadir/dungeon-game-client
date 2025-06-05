@@ -4,19 +4,24 @@ const SDL_Color FocusComponent::focusBackColor = { 0x45, 0x45, 0x45, 0xFF };
 const SDL_Color FocusComponent::hoverBackColor = { 0x50, 0x50, 0x75, 0xFF };
 
 FocusComponent::FocusComponent(Context *context)
-    : Component(context) { }
+    : Component(context), onClickCallback(nullptr)
+{ }
 
 FocusComponent::~FocusComponent() {
     setFocusGroup(nullptr);
 }
 
+void FocusComponent::onHover() { }
+void FocusComponent::onLeave() { }
+
 void FocusComponent::onClick() {
     focused ? unfocus() : focus();
 }
 
-void FocusComponent::onHover() { }
-void FocusComponent::onLeave() { }
-void FocusComponent::onRelease() { }
+void FocusComponent::onRelease() {
+    if (onClickCallback) 
+        onClickCallback();
+}
 
 void FocusComponent::setFocusGroup(FocusComponent **focusGroup) {
     if (this->focusGroup && *this->focusGroup == this)
@@ -41,8 +46,26 @@ void FocusComponent::unfocus() {
         *focusGroup = nullptr;
 }
 
+void FocusComponent::destroyFocus() {
+    if (focusGroup && *focusGroup) {
+        (*focusGroup)->unfocus();
+        *focusGroup = nullptr;
+    }
+}
+
+void FocusComponent::clearState() {
+    clearVolatileState();
+}
+
+void FocusComponent::clearVolatileState() {
+    unfocus();
+    hovered = false;
+    pressed = false;
+    //determineColor();
+}
+
 bool FocusComponent::handleMouseEvents() {
-    if (!enabled)
+    if (!attached)
         return false;
 
     bool dirty = false;
@@ -69,13 +92,13 @@ bool FocusComponent::handleMouseEvents() {
         dirty = true;
     }
 
-    determineColor();
+    //determineColor();
 
     return dirty;
 }
 
-bool FocusComponent::handleMouseEvents(const SDL_Event &event) {
-    if (!enabled)
+bool FocusComponent::handleEvents(const SDL_Event &event) {
+    if (!attached)
         return false;
 
     bool dirty = false;
@@ -103,7 +126,7 @@ bool FocusComponent::handleMouseEvents(const SDL_Event &event) {
             break;
 
         case SDL_EVENT_MOUSE_BUTTON_UP:
-            if (event.button.button == SDL_BUTTON_LEFT && pressed) {
+            if (event.button.button == SDL_BUTTON_LEFT && isPressed()) {
                 pressed = false;
                 onRelease();
                 dirty |= true;
@@ -111,13 +134,13 @@ bool FocusComponent::handleMouseEvents(const SDL_Event &event) {
             break;
     }
 
-    determineColor();
+    //determineColor();
 
     return dirty;
 }
 
 void FocusComponent::render() {
-    if (!enabled)
+    if (!attached)
         return;
 
     if (!texture)

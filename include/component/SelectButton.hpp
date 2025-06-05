@@ -17,6 +17,9 @@ class SelectButton : public Button {
 
         void setSelectGroup(bool **selectGroup);
 
+        void clearState() override;
+        void clearVolatileState() override;
+
         void select();
         void deselect();
         bool isSelected() const;

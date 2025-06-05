@@ -10,15 +10,18 @@ class Component {
         SDL_Texture *texture{ nullptr };
         SDL_FRect bounds{ 0, 0, 0, 0 };
         SDL_FPoint relPoint{ 0, 0 };
+        int padding{ defaultPadding };
+        bool attached{ true };
 
         virtual void createTexture() = 0;
         void invalidateTexture();
 
-        static const int padding = 20;
+        static const int defaultPadding{ 20 };
         static const SDL_Color idleColor;
         static const SDL_Color textColor;
 
     public:
+
         Component(Context *context);
         virtual ~Component();
 
@@ -33,8 +36,15 @@ class Component {
         SDL_FPoint getRelPoint() const;
         SDL_Texture *queryTexture();
 
-        virtual bool handleMouseEvents() = 0;
-        virtual bool handleMouseEvents(const SDL_Event &event) = 0;
+        virtual void clearState() = 0;
+        virtual void clearVolatileState() = 0;
+        virtual void attach();
+        virtual void detach();
+        bool isAttached() const;
+
+        /// @deprecated use centralized handleEvents instead
+        virtual bool handleMouseEvents();
+        virtual bool handleEvents(const SDL_Event &event) = 0;
         virtual void render() = 0;
 };
 
@@ -85,6 +95,10 @@ inline SDL_Texture *Component::queryTexture() {
         createTexture();
 
     return texture;
+}
+
+inline bool Component::isAttached() const {
+    return attached;
 }
 
 #endif
