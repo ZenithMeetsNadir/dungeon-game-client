@@ -42,6 +42,9 @@ yourproject
 # Build folders
 **/build
 
+# external dependencies
+external
+
 # IDE
 **/.vscode
 
