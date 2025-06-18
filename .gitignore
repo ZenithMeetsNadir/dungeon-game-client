@@ -36,6 +36,7 @@ CMakeCache.txt
 **/cmake_install.cmake
 **/CMakeFiles/
 **/Makefile
+!Makefile
 *.ninja*
 yourproject
 
@@ -48,4 +49,9 @@ external
 # IDE
 **/.vscode
 
+# output executables
+bin
+output
+
+configure.txt
 buildnotes.txt

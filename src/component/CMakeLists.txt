@@ -10,4 +10,5 @@ target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 target_link_libraries(component PRIVATE
     context
+    sdl_deps
 )

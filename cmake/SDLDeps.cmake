@@ -32,7 +32,7 @@ if(NOT DEFINED SDL_DEPS_INCLUDED)
   FetchContent_MakeAvailable(SDL3_image)
 
   if(WIN32)
-    include_directories("C:/Users/marti/vcpkg/installed/x64-windows/include")
+    #include_directories("C:/Users/marti/vcpkg/installed/x64-windows/include")
     #include_directories("C:/Users/marti/vcpkg/installed/x64-windows/include/SDL3_ttf")
   elseif(LINUX)
     list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
