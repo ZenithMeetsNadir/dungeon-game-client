@@ -9,6 +9,9 @@ if(NOT DEFINED SDL_DEPS_INCLUDED)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
   endif()
 
+  set(SDL_VIDEO_DRIVER_X11 OFF CACHE BOOL "" FORCE)
+  set(SDL_X11_XINPUT2 OFF CACHE BOOL "" FORCE)
+
   FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
@@ -21,9 +24,6 @@ if(NOT DEFINED SDL_DEPS_INCLUDED)
     GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
     GIT_TAG release-3.2.0
   )
-  if (WIN32)  
-    set(SDL3IMAGE_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-  endif()
   set(SDL3IMAGE_BACKEND_STB OFF CACHE BOOL "" FORCE)
   set(SDL3IMAGE_PNG ON CACHE BOOL "" FORCE)
   set(SDL3IMAGE_INSTALL_PLUGINS OFF CACHE BOOL "" FORCE)
@@ -32,13 +32,13 @@ if(NOT DEFINED SDL_DEPS_INCLUDED)
   FetchContent_MakeAvailable(SDL3_image)
 
   if(WIN32)
-    #include_directories("C:/Users/marti/vcpkg/installed/x64-windows/include")
-    #include_directories("C:/Users/marti/vcpkg/installed/x64-windows/include/SDL3_ttf")
+    find_package(SDL3_ttf CONFIG REQUIRED)
   elseif(LINUX)
-    list(APPEND CMAKE_PREFIX_PATH "$ENV{HOME}/.local")
+    FetchContent_Declare(
+      SDL3_ttf
+      GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+      GIT_TAG release-3.2.0
+    )
+    FetchContent_MakeAvailable(SDL3_ttf)
   endif()
-
-  find_package(SDL3_ttf CONFIG REQUIRED)
-
-  # hope to integrate SDL3_ttf in the future... 
 endif()

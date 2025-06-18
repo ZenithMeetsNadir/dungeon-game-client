@@ -6,29 +6,41 @@ else ifeq ($(UNAME_S),Linux)
     OS_NAME := Linux
 endif
 
-OUT_DIR := output
 ASSETS_DIR := assets
+EXECUTABLE := dungeonGame
 
 ifeq ($(OS_NAME),Windows)
+	OUT_DIR := output
 	MKDIR_OUT := @if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	COPY_ASSETS := @xcopy /E /Y /I $(ASSETS_DIR)\. $(OUT_DIR)\$(ASSETS_DIR)
+	EXECUTABLE += .exe
+	EXECUTABLE_PATH := $(OUT_DIR)\$(EXECUTABLE)
 else ifeq ($(OS_NAME),Linux)
-	MKDIR_OUT := @mkdir -p $(OUT_DIR)
-	COPY_ASSETS := @cp -r $(ASSETS_DIR)/. $(OUT_DIR)/$(ASSETS_DIR)
+	OUT_DIR := .
+	EXECUTABLE_PATH := $(OUT_DIR)/$(EXECUTABLE)
 endif
 
-install: mkdir_output _build copy_assets
-	@echo Installing to $(OUT_DIR)...
-	cmake --install build
+_build:
+	@echo Building project...
+	cmake -B build -D CMAKE_INSTALL_PREFIX=$(OUT_DIR)
+	cmake --build build
+
+out: mkdir_output _build copy_assets install
 
 mkdir_output:
 	@echo Creating output directory...
 	$(MKDIR_OUT)
 
-_build:
-	@echo Building project...
-	cmake --build build
-
 copy_assets:
 	@echo Copying assets to $(OUT_DIR)/$(ASSETS_DIR)...
 	$(COPY_ASSETS)
+
+install:
+	@echo Installing to $(OUT_DIR)...
+	cmake --install build
+
+up: $(EXECUTABLE_PATH)
+	@echo Running the game...
+	$(EXECUTABLE_PATH)
+
+$(EXECUTABLE_PATH): install

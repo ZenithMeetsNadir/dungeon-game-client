@@ -51,7 +51,9 @@ external
 
 # output executables
 bin
+lib
 output
+dungeonGame
 
 configure.txt
 buildnotes.txt
