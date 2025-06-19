@@ -39,7 +39,11 @@ class LobbyWindow : public Window {
 
         SelectButton *remoteServer{ nullptr };
         TextInput *remoteIp{ nullptr };
+        TextInput *playerName{ nullptr };
         Button *playButton{ nullptr };
+        Button *quitButton{ nullptr };
+
+        void onQuitClick();
 
         PauseOverlay *pauseOverlay{ nullptr };
 

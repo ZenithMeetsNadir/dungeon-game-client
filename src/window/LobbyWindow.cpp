@@ -30,11 +30,25 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     remoteIp->queryTexture();
     remoteIp->lockHeight();
 
+    playerName = new TextInput(context);
+    playerName->setPlaceholder("Enter your name");
+    playerName->setFocusGroup(&focusGroup);
+    playerName->queryTexture();
+    playerName->lockHeight();
+
     playButton = new Button(context);
     playButton->setText("Play");
     playButton->setFocusGroup(&focusGroup);
     playButton->setWidth();
     playButton->queryTexture();
+    playButton->disable();
+
+    quitButton = new Button(context);
+    quitButton->setText("Quit");
+    quitButton->setFocusGroup(&focusGroup);
+    quitButton->setOnClickListener([this]() { onQuitClick(); });
+    quitButton->setWidth();
+    quitButton->queryTexture();
 
     pauseOverlay = new PauseOverlay(context);
     pauseOverlay->setControlsFocusGroup(&focusGroup);
@@ -43,7 +57,9 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
 }
 
 LobbyWindow::~LobbyWindow() { 
+    delete quitButton;
     delete playButton;
+    delete playerName;
     delete remoteIp;
     delete remoteServer;
 
@@ -55,6 +71,12 @@ LobbyWindow::~LobbyWindow() {
 
     lanLobby->close();
     delete lanLobby;
+}
+
+void LobbyWindow::onQuitClick() {
+    SDL_Event quitEvent;
+    quitEvent.type = SDL_EVENT_QUIT;
+    SDL_PushEvent(&quitEvent);
 }
 
 void LobbyWindow::matchServerVisuals() {
@@ -140,10 +162,27 @@ void LobbyWindow::prepareServerList() const {
     remoteIp->render();
     y += remoteSelected ? remoteIp->getBounds().h + ServerVisual::gap : 0;
 
+    playerName->setBounds(0, y, serverList->w);
+    playerName->setRelPoint(serverListOffset);
+    playerName->render();
+    y += playerName->getBounds().h + ServerVisual::gap;
+
+    float negy = height - ServerVisual::gap;
+
+    SDL_FRect quitButtonBounds = quitButton->getBounds();
+    quitButton->setPos(
+        static_cast<float>((serverList->w - quitButtonBounds.w) / 2),
+        negy -= quitButtonBounds.h
+    );
+
+    quitButton->setRelPoint(serverListOffset);
+    quitButton->render();
+    negy -= ServerVisual::gap;
+
     SDL_FRect playButtonBounds = playButton->getBounds();
     playButton->setPos(
         static_cast<float>((serverList->w - playButtonBounds.w) / 2),
-        height - playButtonBounds.h - ServerVisual::gap
+        negy -= playButtonBounds.h
     );
 
     playButton->setRelPoint(serverListOffset);
@@ -160,6 +199,7 @@ void LobbyWindow::clearLobbyVolatileState() {
     remoteServer->clearVolatileState();
     remoteIp->clearVolatileState();
     playButton->clearVolatileState();
+    quitButton->clearVolatileState();
 
     invalidateServerList();
 }
@@ -220,11 +260,18 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 
         dirty |= remoteServer->handleEvents(event);
         dirty |= remoteIp->handleEvents(event);
+        dirty |= playerName->handleEvents(event);
         dirty |= playButton->handleEvents(event);
+        dirty |= quitButton->handleEvents(event);
+
+        if (!modeSelectGroup || (modeSelectGroup && !*modeSelectGroup))
+            dirty |= playButton->disable();
+        else 
+            dirty |= playButton->enable();
     }
 
     if (dirty)
-        invalidateServerList();    
+        invalidateServerList();
 }
 
 void LobbyWindow::render() {
@@ -253,13 +300,6 @@ void LobbyWindow::render() {
     SDL_RenderTexture(context->renderer, serverList, nullptr, &box);
 
     pauseOverlay->render();
-
-    SDL_Texture* tex = IMG_LoadTexture(context->renderer, "assets/image/playButton.png");
-    if (!tex) 
-        std::cerr << "Failed to load texture: " << SDL_GetError() << "\n";
-
-    SDL_RenderTexture(context->renderer, tex, nullptr, &box);
-    SDL_DestroyTexture(tex);
 
     SDL_RenderPresent(context->renderer);
 

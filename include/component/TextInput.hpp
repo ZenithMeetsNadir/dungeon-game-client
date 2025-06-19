@@ -15,8 +15,6 @@ class TextInput : public FocusComponent {
         void createTexture() override;
         void determineColor() override;
 
-        static const SDL_Color placeholderColor;
-
     public:
         TextInput(Context *context);
         ~TextInput();

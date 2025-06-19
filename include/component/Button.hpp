@@ -20,6 +20,9 @@ class Button : public FocusComponent {
         virtual ~Button();
 
         void setText(const std::string &newText);
+
+        bool enable() override;
+        bool disable() override;
 };
 
 inline void Button::setText(const std::string &newText) {

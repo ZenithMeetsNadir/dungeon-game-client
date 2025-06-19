@@ -13,7 +13,6 @@ ifeq ($(OS_NAME),Windows)
 	OUT_DIR := output
 	MKDIR_OUT := @if not exist $(OUT_DIR) mkdir $(OUT_DIR)
 	COPY_ASSETS := @xcopy /E /Y /I $(ASSETS_DIR)\. $(OUT_DIR)\$(ASSETS_DIR)
-	EXECUTABLE += .exe
 	EXECUTABLE_PATH := $(OUT_DIR)\$(EXECUTABLE)
 else ifeq ($(OS_NAME),Linux)
 	OUT_DIR := .
@@ -25,7 +24,8 @@ _build:
 	cmake -B build -D CMAKE_INSTALL_PREFIX=$(OUT_DIR)
 	cmake --build build
 
-out: mkdir_output _build copy_assets install
+up: _build mkdir_output copy_assets install
+out: _build mkdir_output copy_assets install run
 
 mkdir_output:
 	@echo Creating output directory...
@@ -39,7 +39,7 @@ install:
 	@echo Installing to $(OUT_DIR)...
 	cmake --install build
 
-up: $(EXECUTABLE_PATH)
+run: $(EXECUTABLE_PATH)
 	@echo Running the game...
 	$(EXECUTABLE_PATH)
 

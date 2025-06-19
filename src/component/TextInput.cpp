@@ -1,11 +1,9 @@
 #include <component/TextInput.hpp>
 
-const SDL_Color TextInput::placeholderColor = { 0x70, 0x70, 0x70, 0xFF };
-
 TextInput::TextInput(Context *context)
     : FocusComponent(context)
 { 
-    foreColor = placeholderColor;
+    foreColor = mutedColor;
 }
 
 TextInput::~TextInput() { }
@@ -35,7 +33,7 @@ void TextInput::createTexture() {
 }
 
 void TextInput::determineColor() {
-    foreColor = text.empty() ? placeholderColor : textColor;
+    foreColor = text.empty() ? mutedColor : textColor;
     backColor = focused || hovered ? focusBackColor : idleColor;
 }
 

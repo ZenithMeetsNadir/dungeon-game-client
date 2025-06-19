@@ -1,6 +1,6 @@
 #include <component/Button.hpp>
 
-const SDL_Color Button::pressedBackColor = { 120, 120, 180, 255 };
+const SDL_Color Button::pressedBackColor{ 120, 120, 180, 255 };
 
 Button::Button(Context *context)
     : FocusComponent(context)
@@ -16,7 +16,7 @@ void Button::createTexture() {
         Context::font_psp2,
         text.c_str(),
         text.length(),
-        textColor
+        foreColor
     );
     
     if (!surface) {
@@ -39,4 +39,23 @@ void Button::createTexture() {
 
 void Button::determineColor() {
     backColor = isPressed() ? pressedBackColor : (hovered ? hoverBackColor : idleColor);
+    foreColor = isEnabled() ? textColor : mutedColor;
+}
+
+bool Button::enable() {
+    bool dirty = FocusComponent::enable();
+
+    if (dirty) 
+        invalidateTexture();
+
+    return dirty;
+}
+
+bool Button::disable() {
+    bool dirty = FocusComponent::disable();
+
+    if (dirty)
+        invalidateTexture();
+
+    return dirty;
 }

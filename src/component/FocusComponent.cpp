@@ -53,6 +53,22 @@ void FocusComponent::destroyFocus() {
     }
 }
 
+bool FocusComponent::enable() {
+    bool enabledTemp = enabled;
+    enabled = true;
+    return !enabledTemp;
+}
+
+bool FocusComponent::disable() {
+    bool enabledTemp = enabled;
+    enabled = false;
+
+    if (enabledTemp)
+        clearVolatileState();
+
+    return enabledTemp;
+}
+
 void FocusComponent::clearState() {
     clearVolatileState();
 }
@@ -61,11 +77,10 @@ void FocusComponent::clearVolatileState() {
     unfocus();
     hovered = false;
     pressed = false;
-    //determineColor();
 }
 
 bool FocusComponent::handleMouseEvents() {
-    if (!attached)
+    if (!attached || !enabled)
         return false;
 
     bool dirty = false;
@@ -92,13 +107,11 @@ bool FocusComponent::handleMouseEvents() {
         dirty = true;
     }
 
-    //determineColor();
-
     return dirty;
 }
 
 bool FocusComponent::handleEvents(const SDL_Event &event) {
-    if (!attached)
+    if (!attached || !enabled)
         return false;
 
     bool dirty = false;
@@ -134,8 +147,6 @@ bool FocusComponent::handleEvents(const SDL_Event &event) {
             break;
     }
 
-    //determineColor();
-
     return dirty;
 }
 
@@ -143,10 +154,10 @@ void FocusComponent::render() {
     if (!attached)
         return;
 
+    determineColor();
+
     if (!texture)
         createTexture();
-
-    determineColor();
 
     SDL_SetRenderDrawColor(context->renderer, backColor.r, backColor.g, backColor.b, backColor.a);
     SDL_RenderFillRect(context->renderer, &bounds);

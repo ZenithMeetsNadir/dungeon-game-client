@@ -19,6 +19,7 @@ class Component {
         static const int defaultPadding{ 20 };
         static const SDL_Color idleColor;
         static const SDL_Color textColor;
+        static const SDL_Color mutedColor;
 
     public:
 

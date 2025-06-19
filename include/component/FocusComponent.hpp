@@ -12,6 +12,8 @@ class FocusComponent : public Component {
         bool hovered{ false };
         bool pressed{ false };
 
+        bool enabled{ true };
+
         SDL_Color foreColor{ textColor };
         SDL_Color backColor{ idleColor };
 
@@ -40,6 +42,10 @@ class FocusComponent : public Component {
 
         bool isHovered() const;
         bool isPressed() const;
+        bool isEnabled() const;
+
+        virtual bool enable();
+        virtual bool disable();
 
         void clearState() override;
         void clearVolatileState() override;
@@ -63,6 +69,10 @@ inline bool FocusComponent::isHovered() const {
 
 inline bool FocusComponent::isPressed() const {
     return pressed && hovered;
+}
+
+inline bool FocusComponent::isEnabled() const {
+    return enabled;
 }
 
 #endif
