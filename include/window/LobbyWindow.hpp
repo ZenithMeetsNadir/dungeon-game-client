@@ -2,10 +2,8 @@
 #define LOBBYWINDOW_HPP
 
 #include <client/LanLobbyClient.hpp>
+#include <sdls.h>
 #include "Window.hpp"
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_image/SDL_image.h>
 #include <vector>
 #include <string>
 #include <component/Button.hpp>
@@ -37,15 +35,13 @@ class LobbyWindow : public Window {
         bool *modeSelectGroup{ nullptr };
         FocusComponent *focusGroup{ nullptr };
 
-        SelectButton *remoteServer{ nullptr };
-        TextInput *remoteIp{ nullptr };
-        TextInput *playerName{ nullptr };
-        Button *playButton{ nullptr };
-        Button *quitButton{ nullptr };
+        SelectButton *remoteServer;
+        TextInput *remoteIp;
+        TextInput *playerName;
+        Button *playButton;
+        Button *quitButton;
 
         void onQuitClick();
-
-        PauseOverlay *pauseOverlay{ nullptr };
 
         /// @brief Match the queried server list with serverVisuals.
         void matchServerVisuals();
@@ -60,28 +56,14 @@ class LobbyWindow : public Window {
         SDL_FPoint getServerListOffset() const;
 
         void clearLobbyVolatileState();
-        void forceMotionRefresh();
 
     public: 
-        LobbyWindow(Context *context, TTF_Font *font);
+        LobbyWindow(Context *context);
         virtual ~LobbyWindow();
 
         void handleEvent(const SDL_Event &event) override;
         void render() override;
 };
-
-inline LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo)
-    : serverInfo(serverInfo) 
-{
-    button = new SelectButton(self->context);
-    button->setText(serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
-    button->setSelectGroup(&self->modeSelectGroup);
-    button->setFocusGroup(&self->focusGroup);
-}
-
-inline LobbyWindow::ServerVisual::~ServerVisual() {
-    delete button;
-}
 
 inline void LobbyWindow::invalidateServerList() {
     serverListDirty = true;

@@ -11,11 +11,13 @@
 class PauseOverlay : public Component {
     protected:
         Button *resume;
+        Button *leaveGame;
         Button *quit;
 
         void createTexture() override;
 
         void onResumeClick();
+        void onLeaveGameClick();
         void onQuitClick();
 
         static const int gap{ 20 };

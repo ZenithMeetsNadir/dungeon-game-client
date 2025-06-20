@@ -1,4 +1,5 @@
 #include <window/Context.hpp>
+#include <window/WindowManager.hpp>
 
 TTF_Font *Context::font_psp2 = nullptr;
 
@@ -57,6 +58,8 @@ bool Context::createWindow() {
         return false;
     }
 
+    windowManager = new WindowManager(this);
+
     return true;
 }
 
@@ -69,5 +72,10 @@ void Context::destroyWindow() {
     if (window) {
         SDL_DestroyWindow(window);
         window = nullptr;
+    }
+
+    if (windowManager) {
+        delete windowManager;
+        windowManager = nullptr;
     }
 }

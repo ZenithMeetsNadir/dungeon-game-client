@@ -1,4 +1,5 @@
 #include <component/PauseOverlay.hpp>
+#include <window/WindowManager.hpp>
 
 PauseOverlay::PauseOverlay(Context *context)
     : Component(context)
@@ -10,6 +11,12 @@ PauseOverlay::PauseOverlay(Context *context)
     resume->setWidth();
     resume->queryTexture();
     resume->setOnClickListener([this]() { onResumeClick(); });
+
+    leaveGame = new Button(context);
+    leaveGame->setText("Leave game");
+    leaveGame->setWidth();
+    leaveGame->queryTexture();
+    leaveGame->setOnClickListener([this]() { onLeaveGameClick(); });
 
     quit = new Button(context);
     quit->setText("Quit");
@@ -46,10 +53,16 @@ void PauseOverlay::detach() {
 void PauseOverlay::createTexture() { }
 
 bool PauseOverlay::handleEvents(const SDL_Event &event) {
-    return attached && (resume->handleEvents(event) || quit->handleEvents(event));
+    std::cout << "pause overlay handleEvents" << std::endl;
+    return attached && (resume->handleEvents(event) || quit->handleEvents(event) || leaveGame->handleEvents(event));
 }
 
 void PauseOverlay::onResumeClick() {
+    detach();
+}
+
+void PauseOverlay::onLeaveGameClick() {
+    context->windowManager->switchWindow(WindowManager::WindowType::lobby);
     detach();
 }
 
@@ -64,6 +77,8 @@ void PauseOverlay::render() {
         return;
 
     SDL_SetRenderDrawColor(context->renderer, 0, 0, 0, 0x80);
+    SDL_BlendMode blendMode;
+    SDL_GetRenderDrawBlendMode(context->renderer, &blendMode);
     SDL_SetRenderDrawBlendMode(context->renderer, SDL_BLENDMODE_BLEND);
     SDL_RenderFillRect(context->renderer, &bounds);
 
@@ -73,16 +88,25 @@ void PauseOverlay::render() {
         (bounds.w - quitBounds.w) / 2.f,
         y
     );
-
     quit->render();
 
     y -= quitBounds.h + gap;
+
+    SDL_FRect leaveBounds = leaveGame->getBounds();
+    leaveGame->setPos(
+        (bounds.w - leaveBounds.w) / 2.f,
+        y
+    );
+    leaveGame->render();
+
+    y -= leaveBounds.h + gap;
 
     SDL_FRect resumeBounds = resume->getBounds();
     resume->setPos(
         (bounds.w - resumeBounds.w) / 2.f,
         y
     ); 
-
     resume->render();
+
+    SDL_SetRenderDrawBlendMode(context->renderer, blendMode);
 }

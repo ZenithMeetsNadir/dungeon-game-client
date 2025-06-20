@@ -1,13 +1,26 @@
 #ifndef GAMEWINDOW_HPP
 #define GAMEWINDOW_HPP
 
+#include "Context.hpp"
 #include "Window.hpp"
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_image/SDL_image.h>
+#include <sdls.h>
+#include <component/FocusComponent.hpp>
+#include <component/PauseOverlay.hpp>
 
 class GameWindow : public Window {
-    
+    protected:
+        FocusComponent *focusGroup{ nullptr };
+
+        PauseOverlay *pauseOverlay;
+
+        void updateDimensions();
+
+    public:
+        GameWindow(Context *context);
+        ~GameWindow();
+
+        void handleEvent(const SDL_Event &event) override;
+        void render() override;
 };
 
 #endif

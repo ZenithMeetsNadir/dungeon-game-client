@@ -1,13 +1,24 @@
 #include <window/LobbyWindow.hpp>
+#include <window/WindowManager.hpp>
 
 const SDL_Color LobbyWindow::ServerVisual::textColor = { 255, 255, 255, 255 };
 
-LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
-    : Window(context, font) 
+LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo)
+    : serverInfo(serverInfo) 
 {
-    width = context->initWidth;
-    height = context->initHeight;
+    button = new SelectButton(self->context);
+    button->setText(serverInfo.name + " - " + static_cast<std::string>(serverInfo.addr));
+    button->setSelectGroup(&self->modeSelectGroup);
+    button->setFocusGroup(&self->focusGroup);
+}
 
+LobbyWindow::ServerVisual::~ServerVisual() {
+    delete button;
+}
+
+LobbyWindow::LobbyWindow(Context *context)
+    : Window(context) 
+{
     lanLobby = new LanLobbyClient();
 
     if (!lanLobby->open()) {
@@ -31,7 +42,7 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     remoteIp->lockHeight();
 
     playerName = new TextInput(context);
-    playerName->setPlaceholder("Enter your name");
+    playerName->setPlaceholder("Enter a name");
     playerName->setFocusGroup(&focusGroup);
     playerName->queryTexture();
     playerName->lockHeight();
@@ -42,6 +53,9 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     playButton->setWidth();
     playButton->queryTexture();
     playButton->disable();
+    playButton->setOnClickListener([this]() {
+        this->context->windowManager->switchWindow(WindowManager::WindowType::game);
+    });
 
     quitButton = new Button(context);
     quitButton->setText("Quit");
@@ -49,9 +63,6 @@ LobbyWindow::LobbyWindow(Context *context, TTF_Font *font)
     quitButton->setOnClickListener([this]() { onQuitClick(); });
     quitButton->setWidth();
     quitButton->queryTexture();
-
-    pauseOverlay = new PauseOverlay(context);
-    pauseOverlay->setControlsFocusGroup(&focusGroup);
 
     updateServerListDimenstions();
 }
@@ -120,13 +131,6 @@ void LobbyWindow::updateServerListDimenstions() {
         SDL_TEXTUREACCESS_TARGET, 
         ServerVisual::width, height
     );
-
-    SDL_FRect pauseOverlayBounds{
-        0, 0,
-        static_cast<float>(width),
-        static_cast<float>(height)
-    };
-    pauseOverlay->setBounds(pauseOverlayBounds);
 
     invalidateServerList();
     invalidate();
@@ -204,25 +208,6 @@ void LobbyWindow::clearLobbyVolatileState() {
     invalidateServerList();
 }
 
-void LobbyWindow::forceMotionRefresh() {
-    float mx, my;
-    SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
-
-    SDL_Event event;
-    event.type = SDL_EVENT_MOUSE_MOTION;
-    event.motion.x = mx;
-    event.motion.y = my;
-    event.motion.xrel = 0;
-    event.motion.yrel = 0;
-    event.motion.windowID = SDL_GetWindowID(context->window);
-    event.motion.which = SDL_TOUCH_MOUSEID;
-    event.motion.timestamp = SDL_GetTicksNS();
-    event.motion.state = mouseState;
-    event.motion.reserved = 0;
-
-    handleEvent(event);
-}
-
 void LobbyWindow::handleEvent(const SDL_Event &event) {
     Window::handleEvent(event);
 
@@ -234,41 +219,20 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 
     bool dirty = false;
 
-    dirty |= pauseOverlay->handleEvents(event);
-
-    if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
-        pauseOverlay->isAttached() ? pauseOverlay->detach() : pauseOverlay->attach();
-
-        if (pauseOverlay->isAttached()) {
-            clearLobbyVolatileState();
-            pauseOverlay->clearVolatileState();
-        }     
-
-        forceMotionRefresh();
-        dirty |= true;
+    for (auto &serverVisual : serverVisuals) {
+        dirty |= serverVisual->button->handleEvents(event);
     }
 
-    if (dirty)
-        invalidate();
+    dirty |= remoteServer->handleEvents(event);
+    dirty |= remoteIp->handleEvents(event);
+    dirty |= playerName->handleEvents(event);
+    dirty |= playButton->handleEvents(event);
+    dirty |= quitButton->handleEvents(event);
 
-    dirty = false;
-
-    if (!pauseOverlay->isAttached()) {
-        for (auto &serverVisual : serverVisuals) {
-            dirty |= serverVisual->button->handleEvents(event);
-        }
-
-        dirty |= remoteServer->handleEvents(event);
-        dirty |= remoteIp->handleEvents(event);
-        dirty |= playerName->handleEvents(event);
-        dirty |= playButton->handleEvents(event);
-        dirty |= quitButton->handleEvents(event);
-
-        if (!modeSelectGroup || (modeSelectGroup && !*modeSelectGroup))
-            dirty |= playButton->disable();
-        else 
-            dirty |= playButton->enable();
-    }
+    if (modeSelectGroup && *modeSelectGroup && !remoteIp->getText().empty() && !playerName->getText().empty())
+        dirty |= playButton->enable();
+    else 
+        dirty |= playButton->disable();
 
     if (dirty)
         invalidateServerList();
@@ -298,8 +262,6 @@ void LobbyWindow::render() {
     };
 
     SDL_RenderTexture(context->renderer, serverList, nullptr, &box);
-
-    pauseOverlay->render();
 
     SDL_RenderPresent(context->renderer);
 

@@ -1,6 +1,6 @@
-#include <client/LanLobbyClient.hpp>
 #include <window/Context.hpp>
 #include <window/LobbyWindow.hpp>
+#include <window/WindowManager.hpp>
 #include <iostream>
 
 int main(int argc, char **argv) {
@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    LobbyWindow *lobbyWindow = new LobbyWindow(context, Context::font_psp2);
+    context->windowManager->switchWindow(WindowManager::WindowType::lobby);
 
     bool running = true;
     SDL_Event event;
@@ -25,13 +25,11 @@ int main(int argc, char **argv) {
             if (event.type == SDL_EVENT_QUIT)
                 running = false;
 
-            lobbyWindow->handleEvent(event);
+            context->windowManager->currentWindow->handleEvent(event);
         }
-        
-        lobbyWindow->render();
-    }
 
-    delete lobbyWindow;
+        context->windowManager->currentWindow->render();
+    }
 
     context->destroyWindow();
     delete context;

@@ -1,14 +1,13 @@
 #ifndef WINDOW_HPP
 #define WINDOW_HPP
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
-#include <window/Context.hpp>
+#include <sdls.h>
+
+class Context;
 
 class Window {
     protected:
         Context *context;
-        TTF_Font *font;
 
         int width;
         int height;
@@ -18,10 +17,11 @@ class Window {
         static const SDL_Color windowColor;
 
     public:
-        Window(Context *context, TTF_Font *font);
+        Window(Context *context);
         virtual ~Window();
 
         void invalidate();
+        void forceMotionRefresh();
 
         virtual void handleEvent(const SDL_Event &event);
         virtual void render() = 0;

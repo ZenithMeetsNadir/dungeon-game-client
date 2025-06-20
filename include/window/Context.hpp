@@ -4,9 +4,15 @@
 #include <sdls.h>
 #include <iostream>
 
+struct WindowManager;
+
 struct Context {
     SDL_Window *window{ nullptr };
     SDL_Renderer *renderer{ nullptr };
+
+    /// created by `createWindow`, makes no sense to do that in the constructor without the underlying SDL_Window being created
+    /// call `destroyWindow` to release
+    WindowManager *windowManager{ nullptr };
 
     const char *title;
     int initWidth;
