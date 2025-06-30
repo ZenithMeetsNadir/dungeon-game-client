@@ -6,8 +6,8 @@
 #include <atomic>
 #include <vector>
 #include <mutex>
-#include <udp/UdpServer.hpp>
-#include <udp/DataPacker.hpp>
+#include <net/udp/UdpServer.hpp>
+#include <net/DataPacker.hpp>
 
 class LanLobbyClient {
     public:
@@ -62,9 +62,9 @@ class LanLobbyClient {
         UdpServer *getUdpSearch() const {
             return udpSearch;
         }
-        void copyListeningServersLock(std::vector<GameServerInfo> &dest) {
+        void copyListeningServers(std::vector<GameServerInfo> &dest) {
             serversMutex.lock();
-            dest = listeningServers;
+            dest = listeningServers;    
             serversMutex.unlock();
         }
 

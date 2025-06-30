@@ -22,8 +22,9 @@ LobbyWindow::LobbyWindow(Context *context)
     lanLobby = new LanLobbyClient();
 
     if (!lanLobby->open()) {
-        std::cerr << "Failed to open UDP server" << std::endl;
+        std::cerr << "Failed to open LanLobbyClient" << std::endl;
         lanLobby->close();
+        throw std::exception();
     }
 
     serverVisuals = std::vector<ServerVisual *>();
@@ -92,7 +93,7 @@ void LobbyWindow::onQuitClick() {
 
 void LobbyWindow::matchServerVisuals() {
     std::vector<LanLobbyClient::GameServerInfo> listeningServers;
-    lanLobby->copyListeningServersLock(listeningServers);
+    lanLobby->copyListeningServers(listeningServers);
 
     for (size_t i = 0; i < serverVisuals.size(); ++i) {
         bool found = false;
@@ -229,7 +230,11 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
     dirty |= playButton->handleEvents(event);
     dirty |= quitButton->handleEvents(event);
 
-    if (modeSelectGroup && *modeSelectGroup && !remoteIp->getText().empty() && !playerName->getText().empty())
+    bool lanServerSelected = false;
+    for (auto &serverVisual : serverVisuals) {
+        lanServerSelected |= serverVisual->button->isSelected();
+    }
+    if (modeSelectGroup && *modeSelectGroup && (lanServerSelected || remoteServer->isSelected() && !remoteIp->getText().empty()) && !playerName->getText().empty())
         dirty |= playButton->enable();
     else 
         dirty |= playButton->disable();

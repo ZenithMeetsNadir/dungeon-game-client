@@ -29,9 +29,6 @@ void GameWindow::updateDimensions() {
 void GameWindow::handleEvent(const SDL_Event &event) {
     Window::handleEvent(event);
 
-    if (event.type == SDL_EVENT_MOUSE_MOTION)
-        std::cout << "mouse motion" << std::endl;
-
     switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
             updateDimensions();

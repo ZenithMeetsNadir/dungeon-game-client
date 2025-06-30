@@ -6,6 +6,7 @@
 #include "Window.hpp"
 #include <vector>
 #include <string>
+#include <exception>
 #include <component/Button.hpp>
 #include <component/SelectButton.hpp>
 #include <component/FocusComponent.hpp>

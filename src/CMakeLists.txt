@@ -4,7 +4,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_subdirectory(udp)
+add_subdirectory(net)
 add_subdirectory(client)
 add_subdirectory(window)
 add_subdirectory(component)

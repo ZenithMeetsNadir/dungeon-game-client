@@ -27,16 +27,19 @@ PauseOverlay::PauseOverlay(Context *context)
 
 PauseOverlay::~PauseOverlay() {
     delete resume;
+    delete leaveGame;
     delete quit;
 }
 
 void PauseOverlay::clearState() {
     resume->clearState();
+    leaveGame->clearState();
     quit->clearState();
 }
 
 void PauseOverlay::clearVolatileState() {
     resume->clearVolatileState();
+    leaveGame->clearVolatileState();
     quit->clearVolatileState();
 }
 
@@ -53,7 +56,6 @@ void PauseOverlay::detach() {
 void PauseOverlay::createTexture() { }
 
 bool PauseOverlay::handleEvents(const SDL_Event &event) {
-    std::cout << "pause overlay handleEvents" << std::endl;
     return attached && (resume->handleEvents(event) || quit->handleEvents(event) || leaveGame->handleEvents(event));
 }
 

@@ -4,14 +4,15 @@ const char *const LanLobbyClient::pw = "nejtajnejsiheslouwu";
 const char *const LanLobbyClient::prefix = "uwu";
 
 LanLobbyClient::LanLobbyClient() {
-    this->udpSearch = new UdpServer(IPv4Addr("0.0.0.0", 0));
-    this->dp = new DataPacker(pw, prefix);
-    this->dp->keyValueMode();
+    udpSearch = new UdpServer(IPv4Addr("0.0.0.0", 0));
+    dp = new DataPacker(pw, prefix);
+    dp->keyValueMode();
+    broadcastThread = std::thread();
 }
 
 LanLobbyClient::~LanLobbyClient() {
-    delete this->udpSearch;
-    delete this->dp;
+    delete udpSearch;
+    delete dp;
 }
 
 void LanLobbyClient::refreshServers() {
@@ -113,8 +114,10 @@ bool LanLobbyClient::open() {
 }
 
 void LanLobbyClient::close() {
-    searchRunning.store(false, std::memory_order_release);
-    broadcastThread.join();
+    if (broadcastThread.joinable()) {
+        searchRunning.store(false, std::memory_order_release);
+        broadcastThread.join();
+    }
 
     udpSearch->close();
 }
