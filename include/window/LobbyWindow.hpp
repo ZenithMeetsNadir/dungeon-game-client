@@ -10,7 +10,8 @@
 #include <component/Button.hpp>
 #include <component/SelectButton.hpp>
 #include <component/FocusComponent.hpp>
-#include <component/TextInput.hpp>
+#include <component/textInput/TextInput.hpp>
+#include <component/textInput/IpInput.hpp>
 #include <component/PauseOverlay.hpp>
 
 class LobbyWindow : public Window {
@@ -37,7 +38,7 @@ class LobbyWindow : public Window {
         FocusComponent *focusGroup{ nullptr };
 
         SelectButton *remoteServer;
-        TextInput *remoteIp;
+        IpInput *remoteIp;
         TextInput *playerName;
         Button *playButton;
         Button *quitButton;

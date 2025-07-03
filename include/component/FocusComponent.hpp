@@ -27,6 +27,7 @@ class FocusComponent : public Component {
 
         static const SDL_Color focusBackColor;
         static const SDL_Color hoverBackColor;
+        static const SDL_Color invalidBackColor;
 
     public:
         FocusComponent(Context *context);

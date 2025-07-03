@@ -5,6 +5,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 add_subdirectory(net)
+add_subdirectory(util)
 add_subdirectory(client)
 add_subdirectory(window)
 add_subdirectory(component)

@@ -36,8 +36,8 @@ LobbyWindow::LobbyWindow(Context *context)
     remoteServer->setWidth();
     remoteServer->queryTexture();
 
-    remoteIp = new TextInput(context);
-    remoteIp->setPlaceholder("Enter server ip (ip:port)");
+    remoteIp = new IpInput(context);
+    remoteIp->setPlaceholder("Enter server ip <ip>:[<port>]");
     remoteIp->setFocusGroup(&focusGroup);
     remoteIp->queryTexture();
     remoteIp->lockHeight();

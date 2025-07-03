@@ -1,4 +1,4 @@
-#include <component/TextInput.hpp>
+#include <component/textInput/TextInput.hpp>
 
 TextInput::TextInput(Context *context)
     : FocusComponent(context)

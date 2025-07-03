@@ -8,12 +8,17 @@
 #include <mutex>
 #include <net/udp/UdpServer.hpp>
 #include <net/DataPacker.hpp>
+#include <util/Dotenv.hpp>
 
 class LanLobbyClient {
     public:
         struct GameServerInfo;
 
     protected:
+        u_short destPort;
+        std::string pw;
+        std::string vfytkn;
+
         UdpServer *udpSearch;
         DataPacker *dp;
 
@@ -45,9 +50,6 @@ class LanLobbyClient {
         std::atomic_bool searchRunning{ false };
         std::mutex serversMutex;
 
-        static const u_short destPort = 6969;
-        static const char *const pw;
-        static const char *const prefix;
         static const size_t latency = 3;
 
         LanLobbyClient();

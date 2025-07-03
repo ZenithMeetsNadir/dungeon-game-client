@@ -1,7 +1,8 @@
 #include <component/FocusComponent.hpp>
 
-const SDL_Color FocusComponent::focusBackColor = { 0x45, 0x45, 0x45, 0xFF };
-const SDL_Color FocusComponent::hoverBackColor = { 0x50, 0x50, 0x75, 0xFF };
+const SDL_Color FocusComponent::focusBackColor = { 0x45, 0x45, 0x45, 0xff };
+const SDL_Color FocusComponent::hoverBackColor = { 0x50, 0x50, 0x75, 0xff };
+const SDL_Color FocusComponent::invalidBackColor = { 0x75, 0x40, 0x40, 0xff };
 
 FocusComponent::FocusComponent(Context *context)
     : Component(context), onClickCallback(nullptr)

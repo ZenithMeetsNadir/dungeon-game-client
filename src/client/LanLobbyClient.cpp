@@ -1,11 +1,12 @@
 #include <client/LanLobbyClient.hpp>
 
-const char *const LanLobbyClient::pw = "nejtajnejsiheslouwu";
-const char *const LanLobbyClient::prefix = "uwu";
-
 LanLobbyClient::LanLobbyClient() {
+    destPort = static_cast<u_short>(std::stoi(Dotenv::dotenv.get("lanport")));
+    pw = Dotenv::dotenv.get("pw");
+    vfytkn = Dotenv::dotenv.get("vfytkn");
+
     udpSearch = new UdpServer(IPv4Addr("0.0.0.0", 0));
-    dp = new DataPacker(pw, prefix);
+    dp = new DataPacker(pw.c_str(), vfytkn.c_str());
     dp->keyValueMode();
     broadcastThread = std::thread();
 }
@@ -44,11 +45,8 @@ void LanLobbyClient::refreshServers(GameServerInfo serverInfo) {
     serversMutex.unlock();
 }
 
-void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr, const char *data, size_t size) {
-    //std::cout << "received data from " << inet_ntoa(addr.addr) << ":" << ntohs(addr.port) << std::endl;
-    
+void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr, const char *data, size_t size) {    
     std::string decoded = self->getDataPacker()->whichevercrypt(std::string(data, size));
-    //std::cout << "decoded data: " << decoded << std::endl;
 
     if (!self->getDataPacker()->verify(decoded)) {
         std::cerr << "invalid data received" << std::endl;
@@ -65,8 +63,6 @@ void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr,
             tick
         };
         self->refreshServers(serverInfo);
-
-        //std::cout << serverName << ": " << inet_ntoa(addr.addr) << std::endl;
     }
 }
 

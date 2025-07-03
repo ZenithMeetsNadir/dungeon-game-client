@@ -1,7 +1,7 @@
 #ifndef TEXTINPUT_HPP
 #define TEXTINPUT_HPP
 
-#include "FocusComponent.hpp"
+#include <component/FocusComponent.hpp>
 #include <window/Context.hpp>
 #include <string>
 

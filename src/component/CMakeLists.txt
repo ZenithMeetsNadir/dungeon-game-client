@@ -3,7 +3,8 @@ add_library(component STATIC
     FocusComponent.cpp
     Button.cpp 
     SelectButton.cpp 
-    TextInput.cpp
+    textInput/TextInput.cpp
+    textInput/IpInput.cpp
     PauseOverlay.cpp
 )
 target_include_directories(component PUBLIC ${PROJECT_SOURCE_DIR}/include)
