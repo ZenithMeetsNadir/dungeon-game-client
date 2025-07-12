@@ -69,7 +69,7 @@ bool checkRecvResult(int &recvRes, int bufferSize) {
             case MSGTOOBIG:
                 recvRes = bufferSize;
                 break;
-            case EWOULDBLOCK:
+            case WOULDBLOCK:
                 recvRes = 0;
                 break;
             default:

@@ -5,6 +5,7 @@
 #include "FocusComponent.hpp"
 #include "Button.hpp"
 #include <window/Context.hpp>
+#include <client/GameClient.hpp>
 #include <sdls.h>
 #include <functional>
 

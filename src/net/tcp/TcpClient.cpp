@@ -42,11 +42,12 @@ void TcpClient::close() {
     if (running.load(std::memory_order_acquire)) {
         running.store(false, std::memory_order_release);
         serveTh.join();
-        std::cout << "tcp server shut down" << std::endl;
     }
 
-    if (sock != INVALID_SOCKET)
+    if (sock != INVALID_SOCKET) {
+        std::cout << "tcp client shut down" << std::endl;
         closesocket(sock);
+    }
 
     sock = INVALID_SOCKET;
 }
@@ -82,7 +83,15 @@ void TcpClient::listen() {
         auto listenLoopBound = std::bind(&TcpClient::listenLoop, this);
         serveTh = std::thread(listenLoopBound);
 
-        std::cout << "tcp server running..." << std::endl;
+        std::cout << "tcp client running..." << std::endl;
+    }
+}
+
+void TcpClient::stopListening() {
+    if (running.load(std::memory_order_acquire)) {
+        running.store(false, std::memory_order_release);
+        serveTh.join();
+        std::cout << "tcp client stopped..." << std::endl;
     }
 }
 

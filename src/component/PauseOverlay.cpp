@@ -64,6 +64,8 @@ void PauseOverlay::onResumeClick() {
 }
 
 void PauseOverlay::onLeaveGameClick() {
+    context->windowManager->service->gameClient->disconnectBlocking();
+
     context->windowManager->switchWindow(WindowManager::WindowType::lobby);
     detach();
 }

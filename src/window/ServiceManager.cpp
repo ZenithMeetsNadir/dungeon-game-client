@@ -5,6 +5,5 @@ ServiceManager::ServiceManager() {
 }
 
 ServiceManager::~ServiceManager() {
-    gameClient->close();
     delete gameClient;
 }

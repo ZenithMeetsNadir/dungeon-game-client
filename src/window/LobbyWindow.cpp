@@ -115,13 +115,7 @@ void LobbyWindow::onPlayClick() {
         // close LanLobbyClient (the destination address is now known)
         lanLobby->close();
 
-        GameClient *gameClient = context->windowManager->service->gameClient;
-        if (!gameClient->open(serverAddr)) {
-            std::cerr << "Failed to open GameClient" << std::endl;
-            throw NetworkInitException();
-        }
-
-        gameClient->listenBlocking();
+        context->windowManager->service->gameClient->connectBlocking(serverAddr);
         
         context->windowManager->switchWindow(WindowManager::WindowType::game);
     }

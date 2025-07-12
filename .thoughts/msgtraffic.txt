@@ -1,0 +1,8 @@
+
+key                     sent from   |   protocol   |    hierarchy   |   meaning                                  
+-------------------------------------------------------------------------------------------------------------------------------------------
+s                       cli             udp             lobby           server inquiry
+sname                   srv             udp             lobby           server name
+t                       srv             udp             lobby           server inquiry tick
+die                     cli             tcp             game            close this connection on server       
+

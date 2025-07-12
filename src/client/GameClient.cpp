@@ -6,9 +6,14 @@ GameClient::GameClient() {
     serverVfytkn = Dotenv::dotenv.get("vfytkn");
 
     dp = new DataPacker(serverPw.c_str(), serverVfytkn.c_str());
+    dp->keyValueMode();
 }
 
 GameClient::~GameClient() {
+    try {
+        disconnectBlocking();
+    } catch (const NetworkInitException &e) { }
+
     delete dp;
 }
 
@@ -39,9 +44,9 @@ bool GameClient::open(const IPv4Addr &serverAddr) {
     return true;
 }
 
-void GameClient::connectBlocking() {
+void GameClient::waitConnectionBlocking() {
     if (!udpClient || !tcpClient) {
-        std::cerr << "GameClient not initialized properly (call open)" << std::endl;
+        std::cerr << "GameClient opened properly (call open)" << std::endl;
         throw NetworkInitException();
     }
 
@@ -57,14 +62,45 @@ void GameClient::connectBlocking() {
     tcpClient->listen();
 }
 
+void GameClient::notifyDisconnectBlocking() {
+    if (!udpClient || !tcpClient)
+        return;
+
+    tcpClient->stopListening();
+
+    std::string disconnectMsg = dp->message();
+    dp->msgAppend(disconnectMsg, "die", "");
+    std::string encoded = dp->whichevercrypt(disconnectMsg);
+
+    tcpClient->sendMsg(encoded.c_str(), encoded.size());
+}
+
 void GameClient::close() {
     udpClient->close();
-    delete udpClient;
-    udpClient = nullptr;
+    if (udpClient) {
+        delete udpClient;
+        udpClient = nullptr;
+    }
 
     tcpClient->close();
-    delete tcpClient;
-    tcpClient = nullptr;
+    if (tcpClient) {
+        delete tcpClient;
+        tcpClient = nullptr;
+    }
+}
+
+void GameClient::connectBlocking(const IPv4Addr &serverAddr) {
+    if (!open(serverAddr)) {
+        std::cerr << "Failed to open GameClient" << std::endl;
+        throw NetworkInitException();
+    }
+    
+    waitConnectionBlocking();
+}
+
+void GameClient::disconnectBlocking() {
+    notifyDisconnectBlocking();
+    close();
 }
 
 void GameClient::sendUdpMsg(const char *data) {
