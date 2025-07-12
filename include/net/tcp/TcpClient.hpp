@@ -35,6 +35,7 @@ class TcpClient {
         bool open();
         void close();
         void listen();
+        void stopListening();
         bool isReady() const;
         int sendMsg(const char *data, size_t size) const;
         

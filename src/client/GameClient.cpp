@@ -39,7 +39,7 @@ bool GameClient::open(const IPv4Addr &serverAddr) {
     return true;
 }
 
-void GameClient::listenBlocking() {
+void GameClient::connectBlocking() {
     if (!udpClient || !tcpClient) {
         std::cerr << "GameClient not initialized properly (call open)" << std::endl;
         throw NetworkInitException();

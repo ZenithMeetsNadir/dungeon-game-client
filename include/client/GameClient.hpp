@@ -47,7 +47,8 @@ class GameClient {
         ~GameClient();
 
         bool open(const IPv4Addr &serverAddr);
-        void listenBlocking();
+        void connectBlocking();
+        void disconnectBlocking();
         void close();
 
         void sendUdpMsg(const char *data);
