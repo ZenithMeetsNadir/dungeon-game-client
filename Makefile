@@ -19,8 +19,8 @@ ifeq ($(OS_NAME),Windows)
 	SETUP_ENV := @if not exist $(ASSETS_DIR)\$(DOTENV) @copy $(ASSETS_DIR)\$(DOTENV_DEFAULT) $(ASSETS_DIR)\$(DOTENV)
 	EXECUTABLE_PATH := $(OUT_DIR)\$(EXECUTABLE)
 else ifeq ($(OS_NAME),Linux)
-	OUT_DIR := .output
-	SETUP_ENV := @if not exist $(ASSETS_DIR)/$(DOTENV) @cp $(DOTENV_DEFAULT) $(DOTENV)
+	OUT_DIR := .
+	SETUP_ENV := [ ! -e $(ASSETS_DIR)/$(DOTENV) ] && cp $(ASSETS_DIR)/$(DOTENV_DEFAULT) $(ASSETS_DIR)/$(DOTENV) || true
 	EXECUTABLE_PATH := $(OUT_DIR)/$(EXECUTABLE)
 endif
 

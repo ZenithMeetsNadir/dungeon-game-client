@@ -122,7 +122,6 @@ void LobbyWindow::onPlayClick() {
         }
 
         gameClient->listenBlocking();
-        std::cout << "connected" << std::endl;
         
         context->windowManager->switchWindow(WindowManager::WindowType::game);
     }

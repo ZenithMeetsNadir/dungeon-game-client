@@ -79,7 +79,7 @@ void UdpServer::listen() {
     if (!running.load(std::memory_order_acquire) && dispatchFunc) {
         running.store(true, std::memory_order_release);
 
-        auto listenLoopBound = std::bind(listenLoop, this);
+        auto listenLoopBound = std::bind(&UdpServer::listenLoop, this);
         serveTh = std::thread(listenLoopBound);
 
         std::cout << "udp server running..." << std::endl;

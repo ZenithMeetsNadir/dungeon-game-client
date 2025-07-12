@@ -6,6 +6,7 @@
 
     #define WOULDBLOCK WSAEWOULDBLOCK
     #define MSGTOOBIG WSAEMSGSIZE
+    #define CONNECTWOULDBLOCK WSAEWOULDBLOCK
 
     #define GETLASTERROR() WSAGetLastError()
 
@@ -20,8 +21,8 @@
 
     #define INVALID_SOCKET (-1)
     #define SOCKET_ERROR (-1)
-    #define WOULDBLOCK EWOULDBLOCK
     #define MSGTOOBIG 0
+    #define CONNECTWOULDBLOCK EINPROGRESS
 
     #define GETLASTERROR() errno
 

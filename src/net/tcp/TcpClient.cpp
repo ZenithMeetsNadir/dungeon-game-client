@@ -28,7 +28,7 @@ bool TcpClient::open() {
 
     if (connect(sock, (const sockaddr *)&hostIp4, sizeof(hostIp4)) == SOCKET_ERROR) {
         int err = GETLASTERROR();
-        if (err != WOULDBLOCK) {
+        if (err != CONNECTWOULDBLOCK) {
             std::cerr << "tcp socket connect failed with code " << err << std::endl;
             closesocket(sock);
             return false;

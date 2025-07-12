@@ -52,7 +52,7 @@ bool connected(SOCKET sock) {
     timeval timeout{ 0, 0 }; 
 
     // only one socket to check
-    int nfds = 1;
+    int nfds = sock + 1;
     int res = select(nfds, nullptr, &set, nullptr, &timeout);
     if (res == SOCKET_ERROR) {
         std::cerr << "select failed with code " << GETLASTERROR() << std::endl;
@@ -69,7 +69,7 @@ bool checkRecvResult(int &recvRes, int bufferSize) {
             case MSGTOOBIG:
                 recvRes = bufferSize;
                 break;
-            case WOULDBLOCK:
+            case EWOULDBLOCK:
                 recvRes = 0;
                 break;
             default:
