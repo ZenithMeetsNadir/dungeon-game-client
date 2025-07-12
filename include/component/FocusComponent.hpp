@@ -48,6 +48,8 @@ class FocusComponent : public Component {
         virtual bool enable();
         virtual bool disable();
 
+        SDL_Texture *queryTexture() override;
+
         void clearState() override;
         void clearVolatileState() override;
 

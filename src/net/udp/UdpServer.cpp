@@ -4,10 +4,10 @@ UdpServer::UdpServer(IPv4Addr addr) {
     this->ip4.sin_family = AF_INET;
     this->ip4.sin_addr = addr.addr;
     this->ip4.sin_port = addr.port;
-    this->dispatchFunc = DispatchFuncT();
+    this->dispatchFunc = UdpDispatchFuncT();
 
     if (!initWsa())
-        return;
+        throw WsaException();
 }
 
 UdpServer::~UdpServer() {
@@ -42,10 +42,10 @@ void UdpServer::close() {
         std::cout << "udp server shut down" << std::endl;
     }
 
-    if (sock != INVALID_SOCKET)
+    if (sock != INVALID_SOCKET) {
         closesocket(sock);
-
-    sock = INVALID_SOCKET;
+        sock = INVALID_SOCKET;
+    }
 }
 
 bool UdpServer::handleRecvMsg(sockaddr_in srcaddr, char *buffer, int recvRes) const {
@@ -79,7 +79,7 @@ void UdpServer::listen() {
     if (!running.load(std::memory_order_acquire) && dispatchFunc) {
         running.store(true, std::memory_order_release);
 
-        auto listenLoopBound = std::bind(&UdpServer::listenLoop, this);
+        auto listenLoopBound = std::bind(listenLoop, this);
         serveTh = std::thread(listenLoopBound);
 
         std::cout << "udp server running..." << std::endl;

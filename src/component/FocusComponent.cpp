@@ -70,6 +70,12 @@ bool FocusComponent::disable() {
     return enabledTemp;
 }
 
+SDL_Texture *FocusComponent::queryTexture() {
+    determineColor();
+    return Component::queryTexture();
+}
+
+
 void FocusComponent::clearState() {
     clearVolatileState();
 }

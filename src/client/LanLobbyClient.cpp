@@ -66,16 +66,8 @@ void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr,
     }
 }
 
-struct EncapsulateDispatchFunc {
-    LanLobbyClient *self;
-    
-    void operator()(const UdpServer *const server, IPv4Addr addr, const char *data, size_t size) {
-        LanLobbyClient::dispatchSearchResponse(self, addr, data, size);
-    }
-};
-
 void LanLobbyClient::broadcastSearchLoop(LanLobbyClient *self) {
-    IPv4Addr brdcast("255.255.255.255", 6969);
+    IPv4Addr brdcast("255.255.255.255", self->destPort);
 
     std::cout << "broadcasting search trigger..." << std::endl;
     while (self->searchRunning.load(std::memory_order_acquire)) {
@@ -96,11 +88,12 @@ bool LanLobbyClient::open() {
     if (!udpSearch->open())
         return false;
 
-    if (!udpSearch->enableBroadcast())
+    if (!udpSearch->enableBroadcast()) {
+        udpSearch->close();
         return false;
+    }
 
     udpSearch->setDispatchFunc(EncapsulateDispatchFunc{ this });
-
     udpSearch->listen();
 
     searchRunning.store(true, std::memory_order_release);

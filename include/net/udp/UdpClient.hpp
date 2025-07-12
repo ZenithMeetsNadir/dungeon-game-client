@@ -12,7 +12,6 @@ class UdpClient : public UdpServer {
         ~UdpClient();
 
         bool open() override;
-        void listen() override;
         int sendMsg(const char *data, size_t size) const;
 };
 

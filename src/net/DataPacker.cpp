@@ -25,7 +25,7 @@ std::string DataPacker::valueOf(std::string data, const char *key) const {
     size_t eIndex = data.find(delim, sIndex);
 
     if (sIndex == std::string::npos)
-        return "";
+        throw DataPackerKeyNotFoundException();
 
     size_t valueStart = sIndex + strlen(key) + 1;
     return data.substr(valueStart, eIndex - valueStart);
@@ -35,7 +35,7 @@ std::string DataPacker::message() const {
     return prefix;
 }
 
-void DataPacker::msgAppend(std::string &message, const char *key, std::string value) const {
+void DataPacker::msgAppend(std::string &message, const char *key, const std::string &value) const {
     message += delim;
 
     if (key) {

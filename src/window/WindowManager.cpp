@@ -3,7 +3,9 @@
 
 WindowManager::WindowManager(Context *context)
     : context(context)
-{ }
+{ 
+    service = new ServiceManager();
+}
 
 WindowManager::~WindowManager() { 
     currentWindow = nullptr;
@@ -13,6 +15,8 @@ WindowManager::~WindowManager() {
             windowStorage[i] = nullptr;
         }
     }
+
+    delete service;
 }
 
 void WindowManager::switchWindow(WindowType type) {

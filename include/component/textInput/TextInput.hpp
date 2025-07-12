@@ -12,6 +12,8 @@ class TextInput : public FocusComponent {
 
         bool heightLocked{ false };
 
+        std::function<void()> onTextChangedCallBack;
+
         void createTexture() override;
         void determineColor() override;
 
@@ -24,6 +26,8 @@ class TextInput : public FocusComponent {
         void setPlaceholder(const std::string &newPlaceholder);
         std::string getPlaceholder() const;
         void lockHeight();
+
+        void setOnTextChangedListener(const std::function<void()> &callback);
 
         void focus() override;
         void unfocus() override;
@@ -55,6 +59,10 @@ inline std::string TextInput::getPlaceholder() const {
 
 inline void TextInput::lockHeight() {
     heightLocked = true;
+}
+
+inline void TextInput::setOnTextChangedListener(const std::function<void()> &callback) {
+    onTextChangedCallBack = callback;
 }
 
 #endif

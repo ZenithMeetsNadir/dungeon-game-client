@@ -15,6 +15,14 @@ class LanLobbyClient {
         struct GameServerInfo;
 
     protected:
+        struct EncapsulateDispatchFunc {
+            LanLobbyClient *self;
+            
+            void operator()(const UdpServer *const server, IPv4Addr addr, const char *data, size_t size) {
+                LanLobbyClient::dispatchSearchResponse(self, addr, data, size);
+            }
+        };
+
         u_short destPort;
         std::string pw;
         std::string vfytkn;

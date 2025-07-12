@@ -17,9 +17,12 @@ bool UdpClient::open() {
     }
 
     if (connect(sock, (const sockaddr *)&ip4, sizeof(ip4)) == SOCKET_ERROR) {
-        std::cerr << "udp socket connect failed with code " << GETLASTERROR() << std::endl;
-        closesocket(sock);
-        return false;
+        int err = GETLASTERROR();
+        if (err != WOULDBLOCK) {
+            std::cerr << "udp socket connect failed with code " << err << std::endl;
+            closesocket(sock);
+            return false;
+        }
     }
 
     return true;

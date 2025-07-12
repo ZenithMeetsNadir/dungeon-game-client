@@ -22,6 +22,13 @@ void Component::detach() {
     clearState();
 }
 
+SDL_Texture *Component::queryTexture() {
+    if (!texture) 
+        createTexture();
+
+    return texture;
+}
+
 bool Component::handleMouseEvents() {
     return false;
 }

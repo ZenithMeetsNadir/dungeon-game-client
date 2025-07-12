@@ -4,10 +4,11 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <exception/DotenvException.hpp>
 
 class Dotenv {
     private: 
-        std::ifstream fileStream;
+        std::fstream fileStream;
 
     public:
         static const char *const envPath;
@@ -17,6 +18,7 @@ class Dotenv {
         ~Dotenv();
 
         std::string get(const char *key);
+        void set(const char *key, const char *value);
 };
 
 #endif

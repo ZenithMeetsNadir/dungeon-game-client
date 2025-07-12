@@ -1,7 +1,7 @@
 #include <window/LobbyWindow.hpp>
 #include <window/WindowManager.hpp>
 
-const SDL_Color LobbyWindow::ServerVisual::textColor = { 255, 255, 255, 255 };
+const SDL_Color LobbyWindow::ServerVisual::textColor{ 255, 255, 255, 255 };
 
 LobbyWindow::ServerVisual::ServerVisual(LobbyWindow *self, const LanLobbyClient::GameServerInfo &serverInfo)
     : serverInfo(serverInfo) 
@@ -23,8 +23,7 @@ LobbyWindow::LobbyWindow(Context *context)
 
     if (!lanLobby->open()) {
         std::cerr << "Failed to open LanLobbyClient" << std::endl;
-        lanLobby->close();
-        throw std::exception();
+        throw NetworkInitException();
     }
 
     serverVisuals = std::vector<ServerVisual *>();
@@ -41,6 +40,7 @@ LobbyWindow::LobbyWindow(Context *context)
     remoteIp->setFocusGroup(&focusGroup);
     remoteIp->queryTexture();
     remoteIp->lockHeight();
+    remoteIp->setOnTextChangedListener([this]() { onRemoteIpTextChanged(); });
 
     playerName = new TextInput(context);
     playerName->setPlaceholder("Enter a name");
@@ -54,9 +54,7 @@ LobbyWindow::LobbyWindow(Context *context)
     playButton->setWidth();
     playButton->queryTexture();
     playButton->disable();
-    playButton->setOnClickListener([this]() {
-        this->context->windowManager->switchWindow(WindowManager::WindowType::game);
-    });
+    playButton->setOnClickListener([this]() { onPlayClick(); });
 
     quitButton = new Button(context);
     quitButton->setText("Quit");
@@ -83,6 +81,51 @@ LobbyWindow::~LobbyWindow() {
 
     lanLobby->close();
     delete lanLobby;
+}
+
+void LobbyWindow::onRemoteIpTextChanged() {
+    try {
+        playerName->setText(Dotenv::dotenv.get(("plrname_at_" + static_cast<std::string>(remoteIp->getQualfAddr())).c_str()));
+    } 
+    catch (const DotenvException &ex) { }
+    catch (const IPv4AddrException & ex) { }
+}
+
+void LobbyWindow::onPlayClick() {
+    if (modeSelectGroup && *modeSelectGroup) {
+        IPv4Addr serverAddr;
+        std::string server = "";
+
+        if (remoteServer->isSelected()) {
+            serverAddr = remoteIp->getQualfAddr();
+            server = serverAddr;
+        } else {
+            for (auto &serverVisual : serverVisuals) {
+                if (serverVisual->button->isSelected()) {
+                    serverAddr = serverVisual->serverInfo.addr;
+                    server = serverVisual->serverInfo.name;
+                    break;
+                }
+            }
+        }
+
+        // cache player name
+        Dotenv::dotenv.set(("plrname_at_" + server).c_str(), playerName->getText().c_str());
+
+        // close LanLobbyClient (the destination address is now known)
+        lanLobby->close();
+
+        GameClient *gameClient = context->windowManager->service->gameClient;
+        if (!gameClient->open(serverAddr)) {
+            std::cerr << "Failed to open GameClient" << std::endl;
+            throw NetworkInitException();
+        }
+
+        gameClient->listenBlocking();
+        std::cout << "connected" << std::endl;
+        
+        context->windowManager->switchWindow(WindowManager::WindowType::game);
+    }
 }
 
 void LobbyWindow::onQuitClick() {
@@ -203,6 +246,7 @@ void LobbyWindow::clearLobbyVolatileState() {
 
     remoteServer->clearVolatileState();
     remoteIp->clearVolatileState();
+    playerName->clearVolatileState();
     playButton->clearVolatileState();
     quitButton->clearVolatileState();
 
@@ -223,7 +267,7 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
     for (auto &serverVisual : serverVisuals) {
         dirty |= serverVisual->button->handleEvents(event);
     }
-
+    
     dirty |= remoteServer->handleEvents(event);
     dirty |= remoteIp->handleEvents(event);
     dirty |= playerName->handleEvents(event);
@@ -232,9 +276,18 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 
     bool lanServerSelected = false;
     for (auto &serverVisual : serverVisuals) {
-        lanServerSelected |= serverVisual->button->isSelected();
+        if (serverVisual->button->isSelected()) {
+            lanServerSelected = true;
+
+            // try to load cached player name  
+            try {
+                playerName->setText(Dotenv::dotenv.get(("plrname_at_" + serverVisual->serverInfo.name).c_str()));
+            } catch (const DotenvException &ex) { }
+
+            break;
+        }
     }
-    if (modeSelectGroup && *modeSelectGroup && (lanServerSelected || remoteServer->isSelected() && !remoteIp->getText().empty()) && !playerName->getText().empty())
+    if (modeSelectGroup && *modeSelectGroup && (lanServerSelected || remoteServer->isSelected() && remoteIp->isValid()) && !playerName->getText().empty())
         dirty |= playButton->enable();
     else 
         dirty |= playButton->disable();

@@ -13,6 +13,9 @@
 #include <component/textInput/TextInput.hpp>
 #include <component/textInput/IpInput.hpp>
 #include <component/PauseOverlay.hpp>
+#include <util/Dotenv.hpp>
+#include <exception/DotenvException.hpp>
+#include <exception/NetworkInitException.hpp>
 
 class LobbyWindow : public Window {
     protected:
@@ -42,7 +45,9 @@ class LobbyWindow : public Window {
         TextInput *playerName;
         Button *playButton;
         Button *quitButton;
-
+        
+        void onRemoteIpTextChanged();
+        void onPlayClick();
         void onQuitClick();
 
         /// @brief Match the queried server list with serverVisuals.

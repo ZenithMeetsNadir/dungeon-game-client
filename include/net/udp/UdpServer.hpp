@@ -9,16 +9,17 @@
 #include <atomic>
 #include <functional>
 #include <string>
+#include <exception/WsaException.hpp>
 
 class UdpServer;
 
-typedef std::function<void(const UdpServer *const, IPv4Addr, const char *, size_t)> DispatchFuncT;
+typedef std::function<void(const UdpServer *const, const IPv4Addr &, const char *, size_t)> UdpDispatchFuncT;
 
 class UdpServer {
     protected: 
         SOCKET sock{ INVALID_SOCKET };
         sockaddr_in ip4;
-        DispatchFuncT dispatchFunc;
+        UdpDispatchFuncT dispatchFunc;
         std::thread serveTh;
 
         virtual void listenLoop() const;
@@ -34,11 +35,11 @@ class UdpServer {
 
         virtual bool open();
         virtual void close();
-        virtual void listen();
+        void listen();
         int sendTo(IPv4Addr addr, const char *data, size_t size) const;
         bool enableBroadcast() const;
 
-        void setDispatchFunc(DispatchFuncT func) {
+        void setDispatchFunc(UdpDispatchFuncT func) {
             dispatchFunc = func;
         }
 };

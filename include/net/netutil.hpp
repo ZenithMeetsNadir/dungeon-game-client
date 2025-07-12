@@ -8,6 +8,7 @@ bool initWsa();
 void deinitWsa();
 
 bool setNonBlocking(SOCKET sock);
+bool connected(SOCKET sock);
 bool checkRecvResult(int &recvRes, int bufferSize);
 
 #endif

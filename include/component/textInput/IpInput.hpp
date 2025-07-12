@@ -2,6 +2,10 @@
 #define IPINPUT_HPP
 
 #include "TextInput.hpp"
+#include <util/Dotenv.hpp>
+#include <net/IPv4Addr.hpp>
+#include <exception/IPv4AddrException.hpp>
+#include <functional>
 
 class IpInput : public TextInput {
     protected:
@@ -16,11 +20,16 @@ class IpInput : public TextInput {
         bool hasPort() const;
         bool isValid() const;
 
+        std::string getAddr() const;
+        u_short getPort() const;
+        IPv4Addr getQualfAddr() const;
+
         bool handleEvents(const SDL_Event &event) override;
 };
 
 inline bool IpInput::hasPort() const {
-    return text.find(':') != std::string::npos;
+    size_t pos = text.find(':');
+    return pos != std::string::npos && pos < text.length() - 1;
 }
 
 #endif

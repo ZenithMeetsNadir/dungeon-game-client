@@ -8,16 +8,17 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <exception/WsaException.hpp>
 
 class TcpClient;
 
-typedef std::function<void(const TcpClient *const, const char *, size_t)> DispatchFuncT;
+typedef std::function<void(const TcpClient *const, const IPv4Addr &, const char *, size_t)> TcpDispatchFuncT;
 
 class TcpClient {
     protected:
         SOCKET sock{ INVALID_SOCKET };
         sockaddr_in hostIp4;
-        DispatchFuncT dispatchFunc;
+        TcpDispatchFuncT dispatchFunc;
         std::thread serveTh;
 
         void listenLoop() const;
@@ -34,11 +35,16 @@ class TcpClient {
         bool open();
         void close();
         void listen();
-        int sendMsg(const char *data, size_t size);
+        bool isReady() const;
+        int sendMsg(const char *data, size_t size) const;
         
-        void setDispatchFunc(DispatchFuncT func) {
+        void setDispatchFunc(TcpDispatchFuncT func) {
             dispatchFunc = func;
         }
 };
+
+inline bool TcpClient::isReady() const {
+    return connected(sock);
+}
 
 #endif

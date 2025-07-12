@@ -51,7 +51,7 @@ void TextInput::unfocus() {
 
 bool TextInput::handleEvents(const SDL_Event &event) {
     bool dirty = FocusComponent::handleEvents(event);
-
+    bool textChanged = false;
     switch (event.type) {
         case SDL_EVENT_TEXT_INPUT: {
             if (focused)
@@ -59,7 +59,7 @@ bool TextInput::handleEvents(const SDL_Event &event) {
 
             invalidateTexture();
         
-            dirty |= true;
+            textChanged |= true;
             break;
         }
         case SDL_EVENT_KEY_DOWN: {
@@ -68,24 +68,26 @@ bool TextInput::handleEvents(const SDL_Event &event) {
 
             invalidateTexture();
 
-            dirty |= true;
+            textChanged |= true;
             break;
         }
     }
 
-    determineColor();
+    if (textChanged && onTextChangedCallBack)
+        onTextChangedCallBack();
 
-    return dirty;
+    return dirty | textChanged;
 }
 
 void TextInput::render() {
     if (!attached)
         return;
 
-    if (!texture)
-        createTexture();
-
     determineColor();
+
+    if (!texture) 
+        createTexture();
+    
 
     SDL_SetRenderDrawColor(context->renderer, backColor.r, backColor.g, backColor.b, backColor.a);
     SDL_RenderFillRect(context->renderer, &bounds);

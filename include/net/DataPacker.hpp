@@ -4,6 +4,7 @@
 #include <string.h>
 #include <iostream>
 #include <string>
+#include <exception/DataPackerKeyNotFoundException.hpp>
 
 struct DataPacker {
     const char *pw;
@@ -26,7 +27,7 @@ struct DataPacker {
 
     std::string valueOf(std::string data, const char *key) const;
     std::string message() const;
-    void msgAppend(std::string &message, const char *key, std::string value) const;
+    void msgAppend(std::string &message, const char *key, const std::string &value) const;
 };
 
 #endif

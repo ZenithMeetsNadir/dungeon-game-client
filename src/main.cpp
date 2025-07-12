@@ -1,6 +1,7 @@
 #include <window/Context.hpp>
 #include <window/LobbyWindow.hpp>
 #include <window/WindowManager.hpp>
+#include <exception/NetworkInitException.hpp>
 #include <iostream>
 
 int main(int argc, char **argv) {
@@ -20,15 +21,21 @@ int main(int argc, char **argv) {
     bool running = true;
     SDL_Event event;
 
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_EVENT_QUIT)
-                running = false;
+    try {
+        while (running) {
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_EVENT_QUIT)
+                    running = false;
 
-            context->windowManager->currentWindow->handleEvent(event);
+                context->windowManager->currentWindow->handleEvent(event);
+            }
+
+            context->windowManager->currentWindow->render();
         }
-
-        context->windowManager->currentWindow->render();
+    }
+    catch (const NetworkInitException &e) {
+        std::cerr << "NetworkInitException: shutting down" << std::endl;
+        running = false;
     }
 
     context->destroyWindow();

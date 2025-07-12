@@ -43,6 +43,25 @@ bool setNonBlocking(SOCKET sock) {
     return false;
 }
 
+bool connected(SOCKET sock) {
+    fd_set set;
+    FD_ZERO(&set);
+    FD_SET(sock, &set);
+
+    // return immediately, just check if the socket is ready
+    timeval timeout{ 0, 0 }; 
+
+    // only one socket to check
+    int nfds = 1;
+    int res = select(nfds, nullptr, &set, nullptr, &timeout);
+    if (res == SOCKET_ERROR) {
+        std::cerr << "select failed with code " << GETLASTERROR() << std::endl;
+        return false;
+    }
+
+    return res > 0 && FD_ISSET(sock, &set);
+}
+
 bool checkRecvResult(int &recvRes, int bufferSize) {
     if (recvRes == SOCKET_ERROR) {
         int err = GETLASTERROR();

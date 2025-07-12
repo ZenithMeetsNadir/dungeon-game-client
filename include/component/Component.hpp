@@ -35,7 +35,7 @@ class Component {
         void setPos(float x, float y);
         void setRelPoint(const SDL_FPoint &point);
         SDL_FPoint getRelPoint() const;
-        SDL_Texture *queryTexture();
+        virtual SDL_Texture *queryTexture();
 
         virtual void clearState() = 0;
         virtual void clearVolatileState() = 0;
@@ -89,13 +89,6 @@ inline void Component::setRelPoint(const SDL_FPoint &point) {
 
 inline SDL_FPoint Component::getRelPoint() const {
     return relPoint;
-}
-
-inline SDL_Texture *Component::queryTexture() {
-    if (!texture) 
-        createTexture();
-
-    return texture;
 }
 
 inline bool Component::isAttached() const {
