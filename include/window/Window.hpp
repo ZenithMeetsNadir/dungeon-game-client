@@ -15,6 +15,7 @@ class Window {
         bool graphicsDirty{ true };
 
         static const SDL_Color windowColor;
+        static const SDL_Color textColor;
 
     public:
         Window(Context *context);
@@ -26,6 +27,7 @@ class Window {
         virtual void enterWindow();
         virtual void leaveWindow();
         virtual void handleEvent(const SDL_Event &event);
+        virtual void compute() = 0;
         virtual void render() = 0;
 };
 

@@ -103,20 +103,15 @@ void LobbyWindow::onPlayClick() {
 
         // cache player name
         Dotenv::dotenv.set(("plrname_at_" + server).c_str(), playerName->getText().c_str());
-
-        // close LanLobbyClient (the destination address is now known)
-        lanLobby->close();
-
-        context->windowManager->service->gameClient->connectBlocking(serverAddr);
         
-        context->windowManager->switchWindow(WindowManager::WindowType::game);
+        context->windowManager->service->gameClient->openConnect(serverAddr);
+
+        context->windowManager->router->gameConnect();
     }
 }
 
 void LobbyWindow::onQuitClick() {
-    SDL_Event quitEvent;
-    quitEvent.type = SDL_EVENT_QUIT;
-    SDL_PushEvent(&quitEvent);
+    context->windowManager->router->gameExit();
 }
 
 void LobbyWindow::matchServerVisuals() {
@@ -248,6 +243,9 @@ void LobbyWindow::enterWindow() {
         std::cerr << "Failed to open LanLobbyClient" << std::endl;
         throw NetworkInitException();
     }
+
+    invalidate();
+    forceMotionRefresh();
 }
 
 void LobbyWindow::leaveWindow() {
@@ -303,17 +301,17 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
         invalidateServerList();
 }
 
-void LobbyWindow::render() {
+void LobbyWindow::compute() {
     if (SDL_GetTicks() % 1000 == 0)
         matchServerVisuals();
+}
 
+void LobbyWindow::render() {
     if (!graphicsDirty)
         return;
 
-    if (serverListDirty) {
+    if (serverListDirty)
         prepareServerList();
-        serverListDirty = false;
-    }
 
     SDL_SetRenderDrawColor(context->renderer, windowColor.r, windowColor.g, windowColor.b, windowColor.a);
     SDL_RenderClear(context->renderer);

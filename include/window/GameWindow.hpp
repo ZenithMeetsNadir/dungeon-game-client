@@ -20,6 +20,7 @@ class GameWindow : public Window {
         ~GameWindow();
 
         void handleEvent(const SDL_Event &event) override;
+        void compute() override;
         void render() override;
 };
 

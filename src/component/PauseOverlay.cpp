@@ -66,14 +66,12 @@ void PauseOverlay::onResumeClick() {
 void PauseOverlay::onLeaveGameClick() {
     context->windowManager->service->gameClient->disconnectBlocking();
 
-    context->windowManager->switchWindow(WindowManager::WindowType::lobby);
     detach();
+    context->windowManager->router->gameDisconnect();
 }
 
 void PauseOverlay::onQuitClick() {
-    SDL_Event quitEvent;
-    quitEvent.type = SDL_EVENT_QUIT;
-    SDL_PushEvent(&quitEvent);
+    context->windowManager->router->gameExit();
 }
 
 void PauseOverlay::render() {

@@ -56,6 +56,8 @@ void GameWindow::handleEvent(const SDL_Event &event) {
     }
 }
 
+void GameWindow::compute() { }
+
 void GameWindow::render() {
     if (!graphicsDirty)
         return;

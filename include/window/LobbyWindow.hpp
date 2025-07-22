@@ -71,6 +71,7 @@ class LobbyWindow : public Window {
         void enterWindow() override;
         void leaveWindow() override;
         void handleEvent(const SDL_Event &event) override;
+        void compute() override;
         void render() override;
 };
 

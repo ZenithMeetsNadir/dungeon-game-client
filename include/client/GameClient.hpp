@@ -40,8 +40,6 @@ class GameClient {
         std::vector<DispatchHandlerT *> dispatchUdpHandlers;
         std::vector<DispatchHandlerT *> dispatchTcpHandlers;
 
-        void pokeDispatch(const IPv4Addr &addr, const char *data, size_t size);
-
     public:
         GameClient();
         ~GameClient();
@@ -51,6 +49,7 @@ class GameClient {
         void notifyDisconnectBlocking();
         void close();
 
+            void openConnect(const IPv4Addr &serverAddr);
         void connectBlocking(const IPv4Addr &serverAddr);
         void disconnectBlocking();
 

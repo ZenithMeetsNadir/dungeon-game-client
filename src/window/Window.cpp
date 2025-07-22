@@ -2,6 +2,7 @@
 #include <window/Context.hpp>
 
 const SDL_Color Window::windowColor = { 0x20, 0x20, 0x20, 0xFF };
+const SDL_Color Window::textColor = { 0xff, 0xff, 0xff, 0xff };
 
 Window::Window(Context *context)
     : context(context)

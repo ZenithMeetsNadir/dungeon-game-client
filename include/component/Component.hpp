@@ -22,6 +22,7 @@ class Component {
         static const SDL_Color mutedColor;
 
     public:
+        static const int defaultMargin{ 20 };
 
         Component(Context *context);
         virtual ~Component();

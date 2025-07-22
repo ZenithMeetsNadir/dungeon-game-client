@@ -4,27 +4,32 @@
 #include "Window.hpp"
 #include "LobbyWindow.hpp"
 #include "GameWindow.hpp"
+#include "ConnectingWindow.hpp"
 #include "ServiceManager.hpp"
-#define NUM_WINDOWS 2
+#include "WindowRouter.hpp"
+#define NUM_WINDOWS 3
 
 struct Context;
 
 struct WindowManager {
     enum class WindowType {
         lobby,
+        connecting,
         game,
     };
 
     Context *context;
     ServiceManager *service;
+    WindowRouter *router;
 
-    Window *windowStorage[NUM_WINDOWS]{ nullptr, nullptr };
+    Window *windowStorage[NUM_WINDOWS]{ nullptr, nullptr, nullptr };
     Window *currentWindow{ nullptr };
+    WindowType currentWindowType;
 
     WindowManager(Context *context);
     ~WindowManager();
 
-    void switchWindow(WindowType type);
+    void switchWindow(WindowType windowType);
 };
 
 #endif

@@ -63,7 +63,7 @@ void GameClient::waitConnectionBlocking() {
 }
 
 void GameClient::notifyDisconnectBlocking() {
-    if (!udpClient || !tcpClient)
+    if (!tcpClient)
         return;
 
     tcpClient->stopListening();
@@ -89,12 +89,15 @@ void GameClient::close() {
     }
 }
 
-void GameClient::connectBlocking(const IPv4Addr &serverAddr) {
+void GameClient::openConnect(const IPv4Addr &serverAddr) {
     if (!open(serverAddr)) {
         std::cerr << "Failed to open GameClient" << std::endl;
         throw NetworkInitException();
     }
-    
+}
+
+void GameClient::connectBlocking(const IPv4Addr &serverAddr) {
+    openConnect(serverAddr);
     waitConnectionBlocking();
 }
 

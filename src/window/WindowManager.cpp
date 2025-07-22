@@ -5,6 +5,7 @@ WindowManager::WindowManager(Context *context)
     : context(context)
 { 
     service = new ServiceManager();
+    router = new WindowRouter(context);
 }
 
 WindowManager::~WindowManager() { 
@@ -16,16 +17,20 @@ WindowManager::~WindowManager() {
         }
     }
 
+    delete router;
     delete service;
 }
 
-void WindowManager::switchWindow(WindowType type) {
-    int index = static_cast<int>(type);
+void WindowManager::switchWindow(WindowType windowType) {
+    int index = static_cast<int>(windowType);
 
     if (!windowStorage[index]) {
-        switch (type) {
+        switch (windowType) {
             case WindowType::lobby:
                 windowStorage[index] = new LobbyWindow(context);
+                break;
+            case WindowType::connecting:
+                windowStorage[index] = new ConnectingWindow(context);
                 break;
             case WindowType::game:
                 windowStorage[index] = new GameWindow(context);
@@ -37,5 +42,6 @@ void WindowManager::switchWindow(WindowType type) {
         currentWindow->leaveWindow();
         
     currentWindow = windowStorage[index];
+    currentWindowType = windowType;
     currentWindow->enterWindow();
 }

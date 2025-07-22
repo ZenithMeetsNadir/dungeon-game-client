@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
                 context->windowManager->currentWindow->handleEvent(event);
             }
 
+            context->windowManager->currentWindow->compute();
             context->windowManager->currentWindow->render();
         }
     }
