@@ -32,19 +32,19 @@ class LobbyWindow : public Window {
             ~ServerVisual();
         };
 
-        LanLobbyClient *lanLobby;
+        LanLobbyClient *lanLobby{ nullptr };
 
         std::vector<ServerVisual *> serverVisuals;
-        SDL_Texture *serverList;
+        SDL_Texture *serverList{ nullptr};
         bool serverListDirty{ true };
         bool *modeSelectGroup{ nullptr };
         FocusComponent *focusGroup{ nullptr };
 
-        SelectButton *remoteServer;
-        IpInput *remoteIp;
-        TextInput *playerName;
-        Button *playButton;
-        Button *quitButton;
+        SelectButton *remoteServer{ nullptr };
+        IpInput *remoteIp{ nullptr};
+        TextInput *playerName{ nullptr};
+        Button *playButton{ nullptr };
+        Button *quitButton{ nullptr};
         
         void onRemoteIpTextChanged();
         void onPlayClick();
@@ -68,6 +68,8 @@ class LobbyWindow : public Window {
         LobbyWindow(Context *context);
         virtual ~LobbyWindow();
 
+        void enterWindow() override;
+        void leaveWindow() override;
         void handleEvent(const SDL_Event &event) override;
         void render() override;
 };

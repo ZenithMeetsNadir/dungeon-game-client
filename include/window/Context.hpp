@@ -15,8 +15,8 @@ struct Context {
     WindowManager *windowManager{ nullptr };
 
     const char *title;
-    int initWidth;
-    int initHeight;
+    int width;
+    int height;
 
     static TTF_Font *font_psp2;
 

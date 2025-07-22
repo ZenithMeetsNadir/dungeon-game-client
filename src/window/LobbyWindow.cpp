@@ -19,13 +19,6 @@ LobbyWindow::ServerVisual::~ServerVisual() {
 LobbyWindow::LobbyWindow(Context *context)
     : Window(context) 
 {
-    lanLobby = new LanLobbyClient();
-
-    if (!lanLobby->open()) {
-        std::cerr << "Failed to open LanLobbyClient" << std::endl;
-        throw NetworkInitException();
-    }
-
     serverVisuals = std::vector<ServerVisual *>();
 
     remoteServer = new SelectButton(context);
@@ -67,6 +60,8 @@ LobbyWindow::LobbyWindow(Context *context)
 }
 
 LobbyWindow::~LobbyWindow() { 
+    leaveWindow();
+
     delete quitButton;
     delete playButton;
     delete playerName;
@@ -78,9 +73,6 @@ LobbyWindow::~LobbyWindow() {
     for (auto serverVisual : serverVisuals) {
         delete serverVisual;
     }
-
-    lanLobby->close();
-    delete lanLobby;
 }
 
 void LobbyWindow::onRemoteIpTextChanged() {
@@ -128,36 +120,38 @@ void LobbyWindow::onQuitClick() {
 }
 
 void LobbyWindow::matchServerVisuals() {
-    std::vector<LanLobbyClient::GameServerInfo> listeningServers;
-    lanLobby->copyListeningServers(listeningServers);
+    if (lanLobby) {
+        std::vector<LanLobbyClient::GameServerInfo> listeningServers;
+        lanLobby->copyListeningServers(listeningServers);
 
-    for (size_t i = 0; i < serverVisuals.size(); ++i) {
-        bool found = false;
-        for (const auto &serverInfo : listeningServers) {
-            if (serverVisuals[i]->serverInfo.sameOrigin(serverInfo)) {
-                found = true;
+        for (size_t i = 0; i < serverVisuals.size(); ++i) {
+            bool found = false;
+            for (const auto &serverInfo : listeningServers) {
+                if (serverVisuals[i]->serverInfo.sameOrigin(serverInfo)) {
+                    found = true;
+                }
+            }
+
+            if (!found) {
+                auto removed = serverVisuals.erase(serverVisuals.begin() + i);
+                delete removed[0];
+                --i;
+                invalidateServerList();
             }
         }
 
-        if (!found) {
-            auto removed = serverVisuals.erase(serverVisuals.begin() + i);
-            delete removed[0];
-            --i;
-            invalidateServerList();
-        }
-    }
+        for (const auto &serverInfo : listeningServers) {
+            bool found = false;
+            for (auto serverVisual : serverVisuals) {
+                if (serverVisual->serverInfo.sameOrigin(serverInfo))
+                    found = true;
+            }
 
-    for (const auto &serverInfo : listeningServers) {
-        bool found = false;
-        for (auto serverVisual : serverVisuals) {
-            if (serverVisual->serverInfo.sameOrigin(serverInfo))
-                found = true;
-        }
-
-        if (!found) {
-            serverVisuals.push_back(new ServerVisual(this, serverInfo));
-            invalidateServerList();
-        }
+            if (!found) {
+                serverVisuals.push_back(new ServerVisual(this, serverInfo));
+                invalidateServerList();
+            }
+        }    
     }
 }
 
@@ -244,6 +238,26 @@ void LobbyWindow::clearLobbyVolatileState() {
     quitButton->clearVolatileState();
 
     invalidateServerList();
+}
+
+void LobbyWindow::enterWindow() {
+    if (!lanLobby)
+        lanLobby = new LanLobbyClient();
+
+    if (!lanLobby->open()) {
+        std::cerr << "Failed to open LanLobbyClient" << std::endl;
+        throw NetworkInitException();
+    }
+}
+
+void LobbyWindow::leaveWindow() {
+    clearLobbyVolatileState();
+
+    if (lanLobby) {
+        lanLobby->close();
+        delete lanLobby;
+        lanLobby = nullptr;
+    }
 }
 
 void LobbyWindow::handleEvent(const SDL_Event &event) {

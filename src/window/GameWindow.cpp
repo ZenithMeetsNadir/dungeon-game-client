@@ -4,8 +4,8 @@
 GameWindow::GameWindow(Context *context)
     : Window(context)
 {
-    width = context->initWidth;
-    height = context->initHeight;
+    width = context->width;
+    height = context->height;
 
     pauseOverlay = new PauseOverlay(context);
     pauseOverlay->setControlsFocusGroup(&focusGroup);

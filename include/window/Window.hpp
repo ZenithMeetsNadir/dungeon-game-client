@@ -23,6 +23,8 @@ class Window {
         void invalidate();
         void forceMotionRefresh();
 
+        virtual void enterWindow();
+        virtual void leaveWindow();
         virtual void handleEvent(const SDL_Event &event);
         virtual void render() = 0;
 };

@@ -6,8 +6,8 @@ const SDL_Color Window::windowColor = { 0x20, 0x20, 0x20, 0xFF };
 Window::Window(Context *context)
     : context(context)
 { 
-    width = context->initWidth;
-    height = context->initHeight;
+    width = context->width;
+    height = context->height;
 }
 
 Window::~Window() { }
@@ -31,11 +31,18 @@ void Window::forceMotionRefresh() {
     SDL_PeepEvents(&event, 1, SDL_ADDEVENT, SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION);
 }
 
+void Window::enterWindow() { }
+void Window::leaveWindow() { }
+
 void Window::handleEvent(const SDL_Event &event) {
     switch (event.type) {
         case SDL_EVENT_WINDOW_RESIZED:
-            width = event.window.data1;
-            height = event.window.data2;
+            context->width = event.window.data1;
+            context->height = event.window.data2;
+            width = context->width;
+            height = context->height;
+
+            invalidate();
             break;
     }
 }

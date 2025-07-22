@@ -33,5 +33,9 @@ void WindowManager::switchWindow(WindowType type) {
         }
     }
 
+    if (currentWindow)
+        currentWindow->leaveWindow();
+        
     currentWindow = windowStorage[index];
+    currentWindow->enterWindow();
 }

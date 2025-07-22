@@ -21,7 +21,7 @@
 
     #define INVALID_SOCKET (-1)
     #define SOCKET_ERROR (-1)
-    #defind WOULDBLOCK EWOULDBLOCK
+    #define WOULDBLOCK EWOULDBLOCK
     #define MSGTOOBIG 0
     #define CONNECTWOULDBLOCK EINPROGRESS
 

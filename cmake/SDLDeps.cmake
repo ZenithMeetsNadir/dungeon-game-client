@@ -17,6 +17,7 @@ if(NOT DEFINED SDL_DEPS_INCLUDED)
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.2.0
   )
+  set(SDL_PIPEWIRE 0 CACHE BOOL "Disable PipeWire support")
   FetchContent_MakeAvailable(SDL3)
 
   FetchContent_Declare(
