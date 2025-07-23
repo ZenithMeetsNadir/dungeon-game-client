@@ -46,15 +46,25 @@ bool GameClient::open(const IPv4Addr &serverAddr) {
 
 void GameClient::waitConnectionBlocking() {
     if (!udpClient || !tcpClient) {
-        std::cerr << "GameClient opened properly (call open)" << std::endl;
+        std::cerr << "GameClient not opened properly (call open)" << std::endl;
         throw NetworkInitException();
     }
 
-    for (int i = 0; i <= 10 && !tcpClient->isReady(); ++i) {
+    // simulate connection process for debug purposes
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+    for (int i = 0; i <= 10; ++i) {
+        if (tcpClient) {
+            if (tcpClient->isReady())
+                break;
+        } else 
+            throw TcpConnectAbortedException();
+
         if (i == 10) {
             std::cerr << "tcp client is not ready after 10 seconds, giving up" << std::endl;
             throw NetworkInitException();
         }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
@@ -76,14 +86,14 @@ void GameClient::notifyDisconnectBlocking() {
 }
 
 void GameClient::close() {
-    udpClient->close();
     if (udpClient) {
+        udpClient->close();
         delete udpClient;
         udpClient = nullptr;
     }
 
-    tcpClient->close();
     if (tcpClient) {
+        tcpClient->close();
         delete tcpClient;
         tcpClient = nullptr;
     }
@@ -91,7 +101,7 @@ void GameClient::close() {
 
 void GameClient::openConnect(const IPv4Addr &serverAddr) {
     if (!open(serverAddr)) {
-        std::cerr << "Failed to open GameClient" << std::endl;
+        std::cerr << "failed to open GameClient" << std::endl;
         throw NetworkInitException();
     }
 }

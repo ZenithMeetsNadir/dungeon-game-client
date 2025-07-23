@@ -13,13 +13,14 @@ class Component {
         int padding{ defaultPadding };
         bool attached{ true };
 
-        virtual void createTexture() = 0;
-        void invalidateTexture();
-
         static const int defaultPadding{ 20 };
         static const SDL_Color idleColor;
         static const SDL_Color textColor;
         static const SDL_Color mutedColor;
+
+        virtual void createTexture() = 0;
+        void invalidateTexture();
+        void requestWindowMotionRefresh();
 
     public:
         static const int defaultMargin{ 20 };
@@ -59,6 +60,7 @@ inline void Component::invalidateTexture() {
 
 inline void Component::setBounds(const SDL_FRect &newBounds) {
     bounds = newBounds;
+    requestWindowMotionRefresh();
 }
 
 inline SDL_FRect Component::getBounds() const {
@@ -77,15 +79,19 @@ inline void Component::setWidth(float w) {
         bounds.w = texture->w + 2 * padding;
     else
         bounds.w = w;
+
+    requestWindowMotionRefresh();
 }
 
 inline void Component::setPos(float x, float y) {
     bounds.x = x;
     bounds.y = y;
+    requestWindowMotionRefresh();
 }
 
 inline void Component::setRelPoint(const SDL_FPoint &point) {
     relPoint = point;
+    requestWindowMotionRefresh();
 }
 
 inline SDL_FPoint Component::getRelPoint() const {

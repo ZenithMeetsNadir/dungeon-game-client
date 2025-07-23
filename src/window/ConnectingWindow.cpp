@@ -60,8 +60,10 @@ void ConnectingWindow::enterWindow() {
     std::thread connectionThread([this]() {
         try {
             context->windowManager->service->gameClient->waitConnectionBlocking();
-        } catch (const NetworkInitException &ex) {
+        } catch (const NetworkInitException &e) {
             state.store(CONNECTING_WINDOW_STATE_TIMEOUT, std::memory_order_release);
+            return;
+        } catch (const TcpConnectAbortedException &e) {
             return;
         }
 
@@ -71,12 +73,10 @@ void ConnectingWindow::enterWindow() {
     connectionThread.detach();
 
     invalidate();
-    forceMotionRefresh();
+    requestMotionRefresh();
 }
 
 void ConnectingWindow::leaveWindow() {
-    abortButton->destroyFocus();
-
     if (abortButton) {
         delete abortButton;
         abortButton = nullptr;

@@ -13,23 +13,29 @@ Window::Window(Context *context)
 
 Window::~Window() { }
 
-void Window::forceMotionRefresh() {
-    float mx, my;
-    SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
+void Window::satisfyMotionRefreshRequest() {
+    if (motionRefreshRequest) {
+        motionRefreshRequest = false;
 
-    SDL_Event event;
-    event.type = SDL_EVENT_MOUSE_MOTION;
-    event.motion.x = mx;
-    event.motion.y = my;
-    event.motion.xrel = 0;
-    event.motion.yrel = 0;
-    event.motion.windowID = SDL_GetWindowID(context->window);
-    event.motion.which = SDL_TOUCH_MOUSEID;
-    event.motion.timestamp = SDL_GetTicksNS();
-    event.motion.state = mouseState;
-    event.motion.reserved = 0;
+        float mx, my;
+        SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&mx, &my);
+        if (mx == 0 || my == 0)
+            return;
 
-    SDL_PeepEvents(&event, 1, SDL_ADDEVENT, SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION);
+        SDL_Event event;
+        event.type = SDL_EVENT_MOUSE_MOTION;
+        event.motion.x = mx;
+        event.motion.y = my;
+        event.motion.xrel = 0;
+        event.motion.yrel = 0;
+        event.motion.windowID = SDL_GetWindowID(context->window);
+        event.motion.which = SDL_TOUCH_MOUSEID;
+        event.motion.timestamp = SDL_GetTicksNS();
+        event.motion.state = mouseState;
+        event.motion.reserved = 0;
+
+        SDL_PeepEvents(&event, 1, SDL_ADDEVENT, SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_MOTION);
+    }
 }
 
 void Window::enterWindow() { }

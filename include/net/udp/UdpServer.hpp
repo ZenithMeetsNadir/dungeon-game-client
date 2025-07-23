@@ -22,6 +22,8 @@ class UdpServer {
         UdpDispatchFuncT dispatchFunc;
         std::thread serveTh;
 
+        virtual std::string getServiceName() const;
+
         virtual void listenLoop() const;
         bool handleRecvMsg(sockaddr_in srcaddr, char *buffer, int recvRes) const;
     

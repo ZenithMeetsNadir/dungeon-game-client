@@ -67,12 +67,11 @@ void LanLobbyClient::dispatchSearchResponse(LanLobbyClient *self, IPv4Addr addr,
 }
 
 void LanLobbyClient::broadcastSearchLoop(LanLobbyClient *self) {
-    IPv4Addr brdcast("255.255.255.255", self->destPort);
+    //IPv4Addr brdcast("255.255.255.255", self->destPort);
+    IPv4Addr brdcast("127.0.0.1", self->destPort);
 
     std::cout << "broadcasting search trigger..." << std::endl;
-    while (self->searchRunning.load(std::memory_order_acquire)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        
+    while (self->searchRunning.load(std::memory_order_acquire)) {        
         std::string message = self->getDataPacker()->message();
         self->getDataPacker()->msgAppend(message, "s", "");
         self->getDataPacker()->msgAppend(message, "t", std::to_string(self->tickCounter++));
@@ -81,6 +80,8 @@ void LanLobbyClient::broadcastSearchLoop(LanLobbyClient *self) {
 
         self->getUdpSearch()->sendTo(brdcast, questionExistence.c_str(), questionExistence.length());
         self->refreshServers();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 }
 

@@ -13,6 +13,7 @@ class Window {
         int height;
 
         bool graphicsDirty{ true };
+        bool motionRefreshRequest{ true };
 
         static const SDL_Color windowColor;
         static const SDL_Color textColor;
@@ -22,7 +23,9 @@ class Window {
         virtual ~Window();
 
         void invalidate();
-        void forceMotionRefresh();
+        void requestMotionRefresh();
+        /// @brief call `requestMotionRefresh` when requesting motion driven rerender on the next frame
+        void satisfyMotionRefreshRequest();
 
         virtual void enterWindow();
         virtual void leaveWindow();
@@ -33,6 +36,10 @@ class Window {
 
 inline void Window::invalidate() {
     graphicsDirty = true;
+}
+
+inline void Window::requestMotionRefresh() {
+    motionRefreshRequest = true;
 }
 
 #endif

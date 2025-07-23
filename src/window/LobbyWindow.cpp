@@ -69,10 +69,6 @@ LobbyWindow::~LobbyWindow() {
     delete remoteServer;
 
     SDL_DestroyTexture(serverList);
-
-    for (auto serverVisual : serverVisuals) {
-        delete serverVisual;
-    }
 }
 
 void LobbyWindow::onRemoteIpTextChanged() {
@@ -128,9 +124,8 @@ void LobbyWindow::matchServerVisuals() {
             }
 
             if (!found) {
-                auto removed = serverVisuals.erase(serverVisuals.begin() + i);
+                auto removed = serverVisuals.erase(serverVisuals.begin() + i--);
                 delete removed[0];
-                --i;
                 invalidateServerList();
             }
         }
@@ -245,7 +240,7 @@ void LobbyWindow::enterWindow() {
     }
 
     invalidate();
-    forceMotionRefresh();
+    requestMotionRefresh();
 }
 
 void LobbyWindow::leaveWindow() {
@@ -256,6 +251,12 @@ void LobbyWindow::leaveWindow() {
         delete lanLobby;
         lanLobby = nullptr;
     }
+
+    for (auto serverVisual : serverVisuals) {
+        delete serverVisual;
+    }
+
+    serverVisuals.clear();
 }
 
 void LobbyWindow::handleEvent(const SDL_Event &event) {
@@ -302,8 +303,11 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 }
 
 void LobbyWindow::compute() {
-    if (SDL_GetTicks() % 1000 == 0)
+    if (SDL_GetTicks() % 1000 == 0 && !serverVisualsUpToDate) {
         matchServerVisuals();
+        serverVisualsUpToDate = true;
+    } else if (SDL_GetTicks() % 1000 == 1)
+        serverVisualsUpToDate = false;
 }
 
 void LobbyWindow::render() {

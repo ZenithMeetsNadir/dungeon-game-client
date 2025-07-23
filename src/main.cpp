@@ -23,6 +23,9 @@ int main(int argc, char **argv) {
 
     try {
         while (running) {
+            context->windowManager->applySwitch();
+            context->windowManager->currentWindow->satisfyMotionRefreshRequest();
+
             while (SDL_PollEvent(&event)) {
                 if (event.type == SDL_EVENT_QUIT)
                     running = false;
@@ -43,6 +46,8 @@ int main(int argc, char **argv) {
     delete context;
 
     Context::quit();
+
+    std::cout << "shut down gracefully" << std::endl;
 
     return 0;
 }

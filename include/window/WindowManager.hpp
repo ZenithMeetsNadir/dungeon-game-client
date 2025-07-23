@@ -25,11 +25,13 @@ struct WindowManager {
     Window *windowStorage[NUM_WINDOWS]{ nullptr, nullptr, nullptr };
     Window *currentWindow{ nullptr };
     WindowType currentWindowType;
+    WindowType requestedWindowType;
 
     WindowManager(Context *context);
     ~WindowManager();
 
     void switchWindow(WindowType windowType);
+    void applySwitch();
 };
 
 #endif

@@ -36,6 +36,7 @@ class LobbyWindow : public Window {
 
         std::vector<ServerVisual *> serverVisuals;
         SDL_Texture *serverList{ nullptr};
+        bool serverVisualsUpToDate{ false }; 
         bool serverListDirty{ true };
         bool *modeSelectGroup{ nullptr };
         FocusComponent *focusGroup{ nullptr };

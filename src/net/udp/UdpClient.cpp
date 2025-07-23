@@ -28,6 +28,10 @@ bool UdpClient::open() {
     return true;
 }
 
+std::string UdpClient::getServiceName() const {
+    return "client";
+}
+
 void UdpClient::listenLoop() const {
     char buffer[UdpServer::BUFFER_SIZE];
 

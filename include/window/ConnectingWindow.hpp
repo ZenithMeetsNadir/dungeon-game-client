@@ -7,6 +7,7 @@
 #include <atomic>
 #include <thread>
 #include <exception/NetworkInitException.hpp>
+#include <exception/TcpConnectAbortedException.hpp>
 
 #define CONNECTING_WINDOW_STATE_PENDING 0
 #define CONNECTING_WINDOW_STATE_SUCCESS 1

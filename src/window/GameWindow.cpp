@@ -6,14 +6,11 @@ GameWindow::GameWindow(Context *context)
 {
     width = context->width;
     height = context->height;
-
-    pauseOverlay = new PauseOverlay(context);
-    pauseOverlay->setControlsFocusGroup(&focusGroup);
-
-    updateDimensions();
 }
 
-GameWindow::~GameWindow() { }
+GameWindow::~GameWindow() {
+    delete pauseOverlay;
+}
 
 void GameWindow::updateDimensions() {
     SDL_FRect pauseOverlayBounds{
@@ -24,6 +21,25 @@ void GameWindow::updateDimensions() {
     pauseOverlay->setBounds(pauseOverlayBounds);
 
     invalidate();
+}
+
+void GameWindow::enterWindow() {
+    if (!pauseOverlay)
+        pauseOverlay = new PauseOverlay(context);
+
+    pauseOverlay->setControlsFocusGroup(&focusGroup);
+
+    updateDimensions();
+
+    requestMotionRefresh();
+    invalidate();
+}
+
+void GameWindow::leaveWindow() {
+    if (pauseOverlay) {
+        delete pauseOverlay;
+        pauseOverlay = nullptr;
+    }
 }
 
 void GameWindow::handleEvent(const SDL_Event &event) {
@@ -44,7 +60,7 @@ void GameWindow::handleEvent(const SDL_Event &event) {
             pauseOverlay->clearVolatileState();
         }     
 
-        forceMotionRefresh();
+        requestMotionRefresh();
         dirty |= true;
     }
 

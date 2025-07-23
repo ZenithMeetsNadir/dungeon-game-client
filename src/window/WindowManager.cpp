@@ -22,26 +22,32 @@ WindowManager::~WindowManager() {
 }
 
 void WindowManager::switchWindow(WindowType windowType) {
-    int index = static_cast<int>(windowType);
+    requestedWindowType = windowType;
+}
 
-    if (!windowStorage[index]) {
-        switch (windowType) {
-            case WindowType::lobby:
-                windowStorage[index] = new LobbyWindow(context);
-                break;
-            case WindowType::connecting:
-                windowStorage[index] = new ConnectingWindow(context);
-                break;
-            case WindowType::game:
-                windowStorage[index] = new GameWindow(context);
-                break;
+void WindowManager::applySwitch() {
+    if (requestedWindowType != currentWindowType) {
+        int index = static_cast<int>(requestedWindowType);
+
+        if (!windowStorage[index]) {
+            switch (requestedWindowType) {
+                case WindowType::lobby:
+                    windowStorage[index] = new LobbyWindow(context);
+                    break;
+                case WindowType::connecting:
+                    windowStorage[index] = new ConnectingWindow(context);
+                    break;
+                case WindowType::game:
+                    windowStorage[index] = new GameWindow(context);
+                    break;
+            }
         }
-    }
 
-    if (currentWindow)
-        currentWindow->leaveWindow();
-        
-    currentWindow = windowStorage[index];
-    currentWindowType = windowType;
-    currentWindow->enterWindow();
+        if (currentWindow)
+            currentWindow->leaveWindow();
+            
+        currentWindow = windowStorage[index];
+        currentWindowType = requestedWindowType;
+        currentWindow->enterWindow();
+    }
 }

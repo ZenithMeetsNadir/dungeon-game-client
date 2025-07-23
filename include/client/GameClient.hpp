@@ -12,6 +12,7 @@
 #include <atomic>
 #include <exception/DataPackerKeyNotFoundException.hpp>
 #include <exception/NetworkInitException.hpp>
+#include <exception/TcpConnectAbortedException.hpp>
 
 typedef std::function<void(const IPv4Addr &, const char *, size_t)> DispatchHandlerT;
 
@@ -49,10 +50,11 @@ class GameClient {
         void notifyDisconnectBlocking();
         void close();
 
-            void openConnect(const IPv4Addr &serverAddr);
+        void openConnect(const IPv4Addr &serverAddr);
         void connectBlocking(const IPv4Addr &serverAddr);
         void disconnectBlocking();
 
+        bool tcpIsReady();
         void sendUdpMsg(const char *data);
         void sendTcpMsg(const char *data);
         void dispatchUdpMsg(const IPv4Addr &addr, const char *data, size_t size);
@@ -63,5 +65,9 @@ class GameClient {
         void removeDispatchUdpHandler(DispatchHandlerT *rmHandler);
         void removeDispatchTcpHandler(DispatchHandlerT *rmHandler);
 };
+
+inline bool GameClient::tcpIsReady() {
+    return tcpClient && tcpClient->isReady();
+}
 
 #endif

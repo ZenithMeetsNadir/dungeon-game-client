@@ -1,4 +1,5 @@
 #include <component/Component.hpp>
+#include <window/WindowManager.hpp>
 
 const SDL_Color Component::idleColor = { 0x30, 0x30, 0x30, 0xFF };
 const SDL_Color Component::textColor = { 0xff, 0xff, 0xff, 0xff };
@@ -11,6 +12,11 @@ Component::Component(Context *context)
 Component::~Component() {
     if (texture)
         SDL_DestroyTexture(texture);
+}
+
+void Component::requestWindowMotionRefresh() {
+    if (context->windowManager->currentWindow)
+        context->windowManager->currentWindow->requestMotionRefresh();
 }
 
 void Component::attach() {

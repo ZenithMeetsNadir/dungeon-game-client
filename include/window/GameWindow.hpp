@@ -11,7 +11,7 @@ class GameWindow : public Window {
     protected:
         FocusComponent *focusGroup{ nullptr };
 
-        PauseOverlay *pauseOverlay;
+        PauseOverlay *pauseOverlay{ nullptr };
 
         void updateDimensions();
 
@@ -19,6 +19,8 @@ class GameWindow : public Window {
         GameWindow(Context *context);
         ~GameWindow();
 
+        void enterWindow() override;
+        void leaveWindow() override;
         void handleEvent(const SDL_Event &event) override;
         void compute() override;
         void render() override;

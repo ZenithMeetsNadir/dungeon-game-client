@@ -14,6 +14,10 @@ UdpServer::~UdpServer() {
     deinitWsa();
 }
 
+std::string UdpServer::getServiceName() const {
+    return "server";
+} 
+
 bool UdpServer::open() {
     sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock == INVALID_SOCKET) {
@@ -39,7 +43,7 @@ void UdpServer::close() {
     if (running.load(std::memory_order_acquire)) {
         running.store(false, std::memory_order_release);
         serveTh.join();
-        std::cout << "udp server shut down" << std::endl;
+        std::cout << "udp " << getServiceName() << " shut down" << std::endl;
     }
 
     if (sock != INVALID_SOCKET) {
@@ -82,7 +86,7 @@ void UdpServer::listen() {
         auto listenLoopBound = std::bind(&UdpServer::listenLoop, this);
         serveTh = std::thread(listenLoopBound);
 
-        std::cout << "udp server running..." << std::endl;
+        std::cout << "udp " << getServiceName() << " running..." << std::endl;
     }
 }
 

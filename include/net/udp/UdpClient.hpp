@@ -5,6 +5,8 @@
 
 class UdpClient : public UdpServer {
     protected:
+        std::string getServiceName() const override;
+        
         void listenLoop() const override;
 
     public:
