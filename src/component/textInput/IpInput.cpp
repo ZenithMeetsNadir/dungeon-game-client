@@ -15,46 +15,68 @@ void IpInput::determineColor() {
         backColor = invalidBackColor;
 }
 
+void IpInput::purifyInput() {
+    for (size_t i = 0; i < text.length(); ++i) {
+        if (!isValidIpChar(text[i]))
+            text.erase(text.begin() + i++);
+    }
+}
+
+bool IpInput::containsInvalidIpChar() const {
+    for (char c : text) {
+        if (!isValidIpChar(c))
+            return true;
+    }
+
+    return false;
+}
+
 bool IpInput::isValidIpChar(char c) {
     return (c >= '0' && c <= '9') || c == '.' || c == ':';
 }
 
-bool IpInput::isValid() const {
+bool IpInput::isValidExplicitCheck() const {
     if (text.empty())
         return false;
+
+    std::cout << text << std::endl;
 
     size_t startPos = 0;
     size_t dotPos = 0;
     bool hasPort = false;
     int dots = 0;
 
-    for (; dots < 4; ++dots) {
-        dotPos = text.find('.', dotPos);
-        if (dotPos == std::string::npos) {
-            dotPos = text.find(':');
-            if (dotPos == std::string::npos)
-                dotPos = text.length();
-            else 
-                hasPort = true;
-        } else if (dots == 3)
+    try {
+        for (; dots < 4; ++dots) {
+            dotPos = text.find('.', dotPos);
+            if (dotPos == std::string::npos) {
+                dotPos = text.find(':');
+                if (dotPos == std::string::npos)
+                    dotPos = text.length();
+                else 
+                    hasPort = true;
+            } else if (dots == 3)
+                return false;
+
+            if (startPos >= dotPos)
+                return false;
+
+            auto digits = text.substr(startPos, dotPos - startPos);
+            if (std::stoi(digits) > 255 || digits.front() == '0' && digits.length() > 1)
+                return false;
+
+            startPos = ++dotPos;
+        }
+
+        if (!hasPort)
+            return true;
+        
+        auto port = text.substr(dotPos);
+        if (port.empty() || std::stoi(port) > 65535 || port.front() == '0' && port.length() > 1)
             return false;
-
-        if (startPos >= dotPos)
-            return false;
-
-        auto digits = text.substr(startPos, dotPos - startPos);
-        if (std::stoi(digits) > 255 || digits.front() == '0' && digits.length() > 1)
-            return false;
-
-        startPos = ++dotPos;
-    }
-
-    if (!hasPort)
-        return true;
-    
-    auto port = text.substr(dotPos);
-    if (port.empty() || std::stoi(port) > 65535 || port.front() == '0' && port.length() > 1)
+    } catch (std::exception) {
         return false;
+    }
 
     return true;
 }

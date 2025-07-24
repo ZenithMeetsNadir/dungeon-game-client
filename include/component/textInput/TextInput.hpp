@@ -5,6 +5,9 @@
 #include <window/Context.hpp>
 #include <string>
 
+#define IS_VALID_MASK 0b1
+#define VALIDATION_ALREADY_RUN 0b10
+
 class TextInput : public FocusComponent {
     protected:
         std::string text;
@@ -12,10 +15,15 @@ class TextInput : public FocusComponent {
 
         bool heightLocked{ false };
 
+        char isValidCache;
+
         std::function<void()> onTextChangedCallBack;
 
         void createTexture() override;
         void determineColor() override;
+
+        void invalidateIsValidCache();
+        virtual bool isValidExplicitCheck() const;
 
     public:
         TextInput(Context *context);
@@ -27,6 +35,8 @@ class TextInput : public FocusComponent {
         std::string getPlaceholder() const;
         void lockHeight();
 
+        virtual bool isValid() const;
+
         void setOnTextChangedListener(const std::function<void()> &callback);
 
         void focus() override;
@@ -35,10 +45,15 @@ class TextInput : public FocusComponent {
         void render() override;
 };
 
+inline void TextInput::invalidateIsValidCache() {
+    isValidCache ^= VALIDATION_ALREADY_RUN;
+}
+
 inline void TextInput::setText(const std::string &newText) {
     if (text != newText) {
         text = newText;
         invalidateTexture();
+        invalidateIsValidCache();
     }
 }
 

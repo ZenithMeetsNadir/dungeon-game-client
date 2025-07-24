@@ -10,7 +10,11 @@
 class IpInput : public TextInput {
     protected:
         void determineColor() override;
-        
+
+        void purifyInput();
+        bool containsInvalidIpChar() const;
+        bool isValidExplicitCheck() const override;
+
         static bool isValidIpChar(char c);
 
     public:
@@ -18,7 +22,6 @@ class IpInput : public TextInput {
         ~IpInput();
 
         bool hasPort() const;
-        bool isValid() const;
 
         std::string getAddr() const;
         u_short getPort() const;

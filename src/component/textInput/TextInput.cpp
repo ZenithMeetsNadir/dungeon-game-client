@@ -37,6 +37,10 @@ void TextInput::determineColor() {
     backColor = focused || hovered ? focusBackColor : idleColor;
 }
 
+bool TextInput::isValidExplicitCheck() const { 
+    return true;
+}
+
 void TextInput::focus() {
     FocusComponent::focus();
 
@@ -49,32 +53,42 @@ void TextInput::unfocus() {
     SDL_StopTextInput(context->window);
 }
 
+bool TextInput::isValid() const {
+    if (isValidCache & VALIDATION_ALREADY_RUN)
+        return isValidCache & IS_VALID_MASK;
+
+    // too lazy to adjust and remove all the const qualifiers - it's a fucking validation function caching its output
+    const_cast<TextInput *>(this)->isValidCache |= VALIDATION_ALREADY_RUN;
+    return isValidExplicitCheck();
+}
+
 bool TextInput::handleEvents(const SDL_Event &event) {
     bool dirty = FocusComponent::handleEvents(event);
     bool textChanged = false;
     switch (event.type) {
-        case SDL_EVENT_TEXT_INPUT: {
-            if (focused)
+        case SDL_EVENT_TEXT_INPUT:
+            if (focused) {
                 text += event.text.text;
 
-            invalidateTexture();
-        
-            textChanged |= true;
+                invalidateTexture();
+                textChanged |= true;
+            }
             break;
-        }
-        case SDL_EVENT_KEY_DOWN: {
-            if (focused && event.key.key == SDLK_BACKSPACE && !text.empty())
+        case SDL_EVENT_KEY_DOWN:
+            if (focused && event.key.key == SDLK_BACKSPACE && !text.empty()) {
                 text.pop_back();
 
-            invalidateTexture();
-
-            textChanged |= true;
+                invalidateTexture();
+                textChanged |= true;
+            }
             break;
-        }
     }
 
-    if (textChanged && onTextChangedCallBack)
-        onTextChangedCallBack();
+    if (textChanged) {
+        invalidateIsValidCache();
+        if (onTextChangedCallBack)
+            onTextChangedCallBack();
+    }
 
     return dirty | textChanged;
 }
