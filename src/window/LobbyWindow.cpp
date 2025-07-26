@@ -73,34 +73,34 @@ LobbyWindow::~LobbyWindow() {
 
 void LobbyWindow::onRemoteIpTextChanged() {
     try {
-        playerName->setText(Dotenv::dotenv.get(("plrname_at_" + static_cast<std::string>(remoteIp->getQualfAddr())).c_str()));
+        playerName->setText(context->service->dotenvRepo.getPlayerNameAtServer(remoteIp->getQualfAddr()));
     } 
-    catch (const DotenvException &ex) { }
-    catch (const IPv4AddrException & ex) { }
+    catch (const DotenvKeyNotFoundException) { }
+    catch (const IPv4AddrIllFormedException) { }
 }
 
 void LobbyWindow::onPlayClick() {
     if (modeSelectGroup && *modeSelectGroup) {
         IPv4Addr serverAddr;
-        std::string server = "";
 
         if (remoteServer->isSelected()) {
             serverAddr = remoteIp->getQualfAddr();
-            server = serverAddr;
+
+            // cache player name
+            context->service->dotenvRepo.updatePlayerNameAtServer(serverAddr, playerName->getText().c_str());
         } else {
             for (auto &serverVisual : serverVisuals) {
                 if (serverVisual->button->isSelected()) {
                     serverAddr = serverVisual->serverInfo.addr;
-                    server = serverVisual->serverInfo.name;
+
+                    // cache player name
+                    context->service->dotenvRepo.updatePlayerNameAtLanServer(serverVisual->serverInfo.name, playerName->getText().c_str());
                     break;
                 }
             }
         }
-
-        // cache player name
-        Dotenv::dotenv.set(("plrname_at_" + server).c_str(), playerName->getText().c_str());
         
-        context->windowManager->service->gameClient->openConnect(serverAddr);
+        context->service->gameClient.openConnect(serverAddr);
 
         context->windowManager->router->gameConnect();
     }
@@ -232,7 +232,7 @@ void LobbyWindow::clearLobbyVolatileState() {
 
 void LobbyWindow::enterWindow() {
     if (!lanLobby)
-        lanLobby = new LanLobbyClient();
+        lanLobby = new LanLobbyClient(context);
 
     if (!lanLobby->open()) {
         std::cerr << "Failed to open LanLobbyClient" << std::endl;
@@ -287,8 +287,8 @@ void LobbyWindow::handleEvent(const SDL_Event &event) {
 
             // try to load cached player name  
             try {
-                playerName->setText(Dotenv::dotenv.get(("plrname_at_" + serverVisual->serverInfo.name).c_str()));
-            } catch (const DotenvException &ex) { }
+                context->service->dotenvRepo.getPlayerNameAtLanServer(serverVisual->serverInfo.name);
+            } catch (DotenvKeyNotFoundException) { }
 
             break;
         }

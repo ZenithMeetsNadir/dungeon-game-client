@@ -9,6 +9,7 @@ add_subdirectory(util)
 add_subdirectory(client)
 add_subdirectory(window)
 add_subdirectory(component)
+add_subdirectory(service)
 
 target_link_libraries(sdl_deps INTERFACE
     SDL3_image::SDL3_image

@@ -10,7 +10,7 @@ ConnectingWindow::~ConnectingWindow() {
 }
 
 void ConnectingWindow::onAbortClick() {
-    context->windowManager->service->gameClient->disconnectBlocking();
+    context->service->gameClient->disconnectBlocking();
     context->windowManager->router->gameDisconnect();
 }
 
@@ -59,7 +59,7 @@ void ConnectingWindow::enterWindow() {
 
     std::thread connectionThread([this]() {
         try {
-            context->windowManager->service->gameClient->waitConnectionBlocking();
+            context->service->gameClient->waitConnectionBlocking();
         } catch (const NetworkInitException &e) {
             state.store(CONNECTING_WINDOW_STATE_TIMEOUT, std::memory_order_release);
             return;
@@ -118,7 +118,7 @@ void ConnectingWindow::compute() {
             context->windowManager->router->gameLoad();
             break;
         case CONNECTING_WINDOW_STATE_TIMEOUT:
-            context->windowManager->service->gameClient->disconnectBlocking();
+            context->service->gameClient->disconnectBlocking();
             context->windowManager->router->gameDisconnect();
             break;
     }

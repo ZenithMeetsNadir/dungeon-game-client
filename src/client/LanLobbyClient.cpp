@@ -1,9 +1,12 @@
 #include <client/LanLobbyClient.hpp>
+#include <window/Context.hpp>
 
-LanLobbyClient::LanLobbyClient() {
-    destPort = static_cast<u_short>(std::stoi(Dotenv::dotenv.get("lanport")));
-    pw = Dotenv::dotenv.get("pw");
-    vfytkn = Dotenv::dotenv.get("vfytkn");
+LanLobbyClient::LanLobbyClient(Context *context) {
+    this->context = context;
+
+    destPort = static_cast<u_short>(std::stoi(context->service->dotenvRepo.getLanPort()));
+    pw = context->service->dotenvRepo.getDefaultPassword();
+    vfytkn = context->service->dotenvRepo.getDefaultVerifyToken();
 
     udpSearch = new UdpServer(IPv4Addr("0.0.0.0", 0));
     dp = new DataPacker(pw.c_str(), vfytkn.c_str());
@@ -12,8 +15,8 @@ LanLobbyClient::LanLobbyClient() {
 }
 
 LanLobbyClient::~LanLobbyClient() {
-    delete udpSearch;
     delete dp;
+    delete udpSearch;
 }
 
 void LanLobbyClient::refreshServers() {

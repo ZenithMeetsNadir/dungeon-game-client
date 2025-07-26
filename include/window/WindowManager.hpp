@@ -5,7 +5,6 @@
 #include "LobbyWindow.hpp"
 #include "GameWindow.hpp"
 #include "ConnectingWindow.hpp"
-#include "ServiceManager.hpp"
 #include "WindowRouter.hpp"
 #define NUM_WINDOWS 3
 
@@ -19,7 +18,6 @@ struct WindowManager {
     };
 
     Context *context;
-    ServiceManager *service;
     WindowRouter *router;
 
     Window *windowStorage[NUM_WINDOWS]{ nullptr, nullptr, nullptr };

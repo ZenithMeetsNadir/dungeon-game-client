@@ -4,7 +4,7 @@
 #include <string.h>
 #include <iostream>
 #include <string>
-#include <exception/DataPackerKeyNotFoundException.hpp>
+#include <exception/DataPackerException.hpp>
 
 struct DataPacker {
     const char *pw;

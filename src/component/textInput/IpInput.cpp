@@ -39,8 +39,6 @@ bool IpInput::isValidExplicitCheck() const {
     if (text.empty())
         return false;
 
-    std::cout << text << std::endl;
-
     size_t startPos = 0;
     size_t dotPos = 0;
     bool hasPort = false;
@@ -74,7 +72,7 @@ bool IpInput::isValidExplicitCheck() const {
         auto port = text.substr(dotPos);
         if (port.empty() || std::stoi(port) > 65535 || port.front() == '0' && port.length() > 1)
             return false;
-    } catch (std::exception) {
+    } catch (const std::exception &e) {
         return false;
     }
 
@@ -83,7 +81,7 @@ bool IpInput::isValidExplicitCheck() const {
 
 std::string IpInput::getAddr() const {
     if (!isValid())
-        throw IPv4AddrException();
+        throw IPv4AddrIllFormedException();
 
     size_t count = hasPort() ? text.find(':') : text.length();
     return text.substr(0, count);
@@ -99,7 +97,7 @@ u_short IpInput::getPort() const {
         return static_cast<u_short>(std::stoi(text.substr(sepPos + 1, count)));
     }
 
-    throw IPv4AddrException();
+    throw IPv4AddrIllFormedException();
 }
 
 IPv4Addr IpInput::getQualfAddr() const {

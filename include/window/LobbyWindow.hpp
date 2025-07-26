@@ -1,7 +1,6 @@
 #ifndef LOBBYWINDOW_HPP
 #define LOBBYWINDOW_HPP
 
-#include <client/LanLobbyClient.hpp>
 #include <sdls.h>
 #include "Window.hpp"
 #include <vector>
@@ -13,9 +12,10 @@
 #include <component/textInput/TextInput.hpp>
 #include <component/textInput/IpInput.hpp>
 #include <component/PauseOverlay.hpp>
+#include <client/LanLobbyClient.hpp>
 #include <util/Dotenv.hpp>
 #include <exception/DotenvException.hpp>
-#include <exception/NetworkInitException.hpp>
+#include <exception/NetworkException.hpp>
 
 class LobbyWindow : public Window {
     protected:

@@ -3,8 +3,7 @@
 
 WindowManager::WindowManager(Context *context)
     : context(context)
-{ 
-    service = new ServiceManager();
+{
     router = new WindowRouter(context);
 }
 
@@ -18,7 +17,6 @@ WindowManager::~WindowManager() {
     }
 
     delete router;
-    delete service;
 }
 
 void WindowManager::switchWindow(WindowType windowType) {

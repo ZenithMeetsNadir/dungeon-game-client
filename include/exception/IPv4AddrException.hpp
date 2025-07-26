@@ -1,4 +1,4 @@
 #pragma once
 #include <exception>
 
-class IPv4AddrException : public std::exception { };
+class IPv4AddrIllFormedException : public std::exception { };

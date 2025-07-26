@@ -10,9 +10,10 @@
 #include <string>
 #include <functional>
 #include <atomic>
-#include <exception/DataPackerKeyNotFoundException.hpp>
-#include <exception/NetworkInitException.hpp>
-#include <exception/TcpConnectAbortedException.hpp>
+#include <exception/DataPackerException.hpp>
+#include <exception/NetworkException.hpp>
+
+class Context;
 
 typedef std::function<void(const IPv4Addr &, const char *, size_t)> DispatchHandlerT;
 
@@ -30,11 +31,12 @@ class GameClient {
             }
         };
 
+        Context *context;
+
         UdpClient *udpClient{ nullptr };
         TcpClient *tcpClient{ nullptr };
         DataPacker *dp;
 
-        u_short serverPort;
         std::string serverPw;
         std::string serverVfytkn;
 
@@ -42,7 +44,7 @@ class GameClient {
         std::vector<DispatchHandlerT *> dispatchTcpHandlers;
 
     public:
-        GameClient();
+        GameClient(Context *context);
         ~GameClient();
 
         bool open(const IPv4Addr &serverAddr);

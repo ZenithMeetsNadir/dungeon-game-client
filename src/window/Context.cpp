@@ -4,9 +4,14 @@
 TTF_Font *Context::font_psp2 = nullptr;
 
 Context::Context(const char *title, int width, int height)
-    : title(title), width(width), height(height) { }
+    : title(title), width(width), height(height) 
+{
+    service = new ServiceManager(this);
+}
 
-Context::~Context() { }
+Context::~Context() { 
+    delete service;
+}
 
 bool Context::init() {
     if (!SDL_Init(SDL_INIT_VIDEO)) {

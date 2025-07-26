@@ -54,12 +54,14 @@ void TextInput::unfocus() {
 }
 
 bool TextInput::isValid() const {
-    if (isValidCache & VALIDATION_ALREADY_RUN)
-        return isValidCache & IS_VALID_MASK;
-
-    // too lazy to adjust and remove all the const qualifiers - it's a fucking validation function caching its output
-    const_cast<TextInput *>(this)->isValidCache |= VALIDATION_ALREADY_RUN;
-    return isValidExplicitCheck();
+    if (!(isValidCache & VALIDATION_ALREADY_RUN)) {
+        // too lazy to adjust and remove all the const qualifiers - it's a fucking validation function caching its output
+        auto notSoConstThis = const_cast<TextInput *>(this);
+        notSoConstThis->isValidCache |= VALIDATION_ALREADY_RUN;
+        notSoConstThis->isValidCache |= isValidExplicitCheck() & IS_VALID_MASK;
+    }
+    
+    return isValidCache & IS_VALID_MASK;
 }
 
 bool TextInput::handleEvents(const SDL_Event &event) {

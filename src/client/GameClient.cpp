@@ -1,9 +1,10 @@
 #include <client/GameClient.hpp>
+#include <window/Context.hpp>
 
-GameClient::GameClient() {
-    serverPort = static_cast<u_short>(std::stoi(Dotenv::dotenv.get("lanport")));
-    serverPw = Dotenv::dotenv.get("pw");
-    serverVfytkn = Dotenv::dotenv.get("vfytkn");
+GameClient::GameClient(Context *context) {
+    this->context = context;
+    serverPw = context->service->dotenvRepo.getDefaultPassword();
+    serverVfytkn = context->service->dotenvRepo.getDefaultVerifyToken();
 
     dp = new DataPacker(serverPw.c_str(), serverVfytkn.c_str());
     dp->keyValueMode();

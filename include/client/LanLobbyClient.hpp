@@ -10,6 +10,8 @@
 #include <net/DataPacker.hpp>
 #include <util/Dotenv.hpp>
 
+class Context;
+
 class LanLobbyClient {
     public:
         struct GameServerInfo;
@@ -22,6 +24,8 @@ class LanLobbyClient {
                 LanLobbyClient::dispatchSearchResponse(self, addr, data, size);
             }
         };
+
+        Context *context;
 
         u_short destPort;
         std::string pw;
@@ -60,7 +64,7 @@ class LanLobbyClient {
 
         static const size_t latency = 3;
 
-        LanLobbyClient();
+        LanLobbyClient(Context *context);
         ~LanLobbyClient();
 
         bool open();

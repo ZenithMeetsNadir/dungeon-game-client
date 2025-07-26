@@ -1,10 +1,13 @@
 #ifndef DOTENV_HPP
 #define DOTENV_HPP
 
+#include <string.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <exception/DotenvException.hpp>
+
+#define READ_FILE_BUFFER_CHUNK 128
 
 class Dotenv {
     private: 
@@ -12,7 +15,6 @@ class Dotenv {
 
     public:
         static const char *const envPath;
-        static Dotenv dotenv;
 
         Dotenv(const char *filePath = envPath);
         ~Dotenv();

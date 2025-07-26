@@ -1,6 +1,7 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
 
+#include <service/ServiceManager.hpp>
 #include <sdls.h>
 #include <iostream>
 
@@ -13,6 +14,7 @@ struct Context {
     /// created by `createWindow`, makes no sense to do that in the constructor without the underlying SDL_Window being created
     /// call `destroyWindow` to release
     WindowManager *windowManager{ nullptr };
+    ServiceManager *service;
 
     const char *title;
     int width;
